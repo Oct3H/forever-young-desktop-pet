@@ -1,0 +1,8 @@
+.DS_Store
+.AppleDouble
+.build/
+DerivedData/
+*.xcuserstate
+*.log
+*.tmp
+制作过程*/
