@@ -1,0 +1,73 @@
+{
+  "name": "forever-young-pet-bridge",
+  "displayName": "Forever Young · Local Pet Bridge",
+  "description": "Local task/debug lifecycle and explicit run controls for Forever Young desktop pet.",
+  "version": "3.7.0",
+  "publisher": "forever-young-local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": false
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "foreverYoung.run",
+        "title": "Forever Young: Run remembered target"
+      },
+      {
+        "command": "foreverYoung.chooseRun",
+        "title": "Forever Young: Choose target without running"
+      },
+      {
+        "command": "foreverYoung.runFile",
+        "title": "Forever Young: Run current file"
+      },
+      {
+        "command": "foreverYoung.build",
+        "title": "Forever Young: Build remembered target"
+      },
+      {
+        "command": "foreverYoung.test",
+        "title": "Forever Young: Run tests"
+      },
+      {
+        "command": "foreverYoung.stop",
+        "title": "Forever Young: Stop task"
+      },
+      {
+        "command": "foreverYoung.openProblems",
+        "title": "Forever Young: Open Problems"
+      },
+      {
+        "command": "foreverYoung.openConsole",
+        "title": "Forever Young: Open task terminal"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "foreverYoungFile",
+        "required": [
+          "file",
+          "requestID"
+        ],
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "requestID": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  }
+}

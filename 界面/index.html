@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'"><title>フォーエバーヤング</title><link rel="stylesheet" href="ui.css"><link rel="stylesheet" href="production.css"><script src="manual.js" defer></script><script src="ui.js" defer></script><script src="tools.js" defer></script></head><body>
+<div id="forever-young-pet-ui">
+  <div class="fy-preview-stage" aria-label="双风格桌面界面概念">
+    <section data-variant="赛马娘二次元" data-ui-surface="anime" aria-label="赛马娘二次元界面概念">
+      <div class="uma-app" aria-label="赛马娘二次元设计">
+        <header class="uma-chrome"><div class="uma-logo"><strong>フォーエバーヤング</strong><span>FOREVER YOUNG</span></div>
+          <div class="fy-settings-anchor"><button type="button" class="fy-settings-button cursor-interaction" data-open-settings data-i18n-label="settings" aria-label="设置" aria-expanded="false" aria-controls="fy-anime-settings"><i data-lucide="settings" aria-hidden="true"></i><span class="fy-settings-word" data-i18n="settings">设置</span></button>
+            <aside id="fy-anime-settings" class="fy-settings" data-i18n-label="settings" aria-label="设置" hidden>
+              <div class="fy-popover-heading"><strong data-i18n="settings">设置</strong><button type="button" class="fy-close cursor-interaction" data-close-settings data-i18n-label="closeSettings" aria-label="关闭设置"><i data-lucide="x" aria-hidden="true"></i></button></div>
+              <label for="fy-anime-style" data-i18n="appearance">外观风格</label><select id="fy-anime-style" class="fy-style-select" data-ui-style><option value="anime" data-i18n="animeStyle">二次元 · Anime</option><option value="minimal" data-i18n="minimalStyle">极简 · Minimal</option></select>
+              <div class="fy-language"><label for="fy-anime-language" data-i18n="language">功能语言</label><select id="fy-anime-language" class="fy-style-select" data-ui-language><option value="zh">简体中文</option><option value="ja">日本語</option><option value="en">English</option></select></div>
+            </aside>
+          </div>
+        </header>
+        <div class="uma-hero">
+          <div class="uma-cloud uma-cloud-a" aria-hidden="true"></div><div class="uma-cloud uma-cloud-b" aria-hidden="true"></div>
+          <div class="uma-course" aria-hidden="true"></div><span class="uma-confetti uma-confetti-a" aria-hidden="true"></span><span class="uma-confetti uma-confetti-b" aria-hidden="true"></span>
+          <div class="uma-hero-copy"><span class="uma-hero-tag">DESKTOP PARTNER</span><h2>プロジェクト<br>デスク</h2><span class="uma-name">フォーエバーヤング</span><span class="uma-name-en">Forever Young</span></div>
+          <img class="uma-character" src="character.webp" alt="フォーエバーヤングの公式勝負服イラスト">
+          <div class="uma-nameplate"><span>パートナー</span><strong>フォーエバーヤング</strong><i data-lucide="sparkles" aria-hidden="true"></i></div>
+        </div>
+        <nav class="uma-navigation" data-i18n-label="navigation" aria-label="功能">
+          <button type="button" class="uma-tab cursor-interaction" data-uma-view="tasks" aria-pressed="true"><i data-lucide="terminal" aria-hidden="true"></i><span data-i18n="tasks">Codex 任务</span></button>
+          <button type="button" class="uma-tab cursor-interaction" data-uma-view="races" aria-pressed="false"><i data-lucide="trophy" aria-hidden="true"></i><span data-i18n="races">GⅠ 赛程</span></button>
+          <div class="fy-module-control"><button type="button" class="fy-modules-button cursor-interaction" data-open-modules data-i18n-label="features" aria-label="全部功能" aria-expanded="false" aria-controls="fy-anime-modules"><i data-lucide="layout-grid" aria-hidden="true"></i><span class="fy-modules-word" data-i18n="features">全部功能</span><i data-lucide="chevron-down" aria-hidden="true"></i></button>
+            <div id="fy-anime-modules" class="fy-module-menu" data-i18n-label="features" aria-label="全部功能" hidden><strong data-i18n="features">全部功能</strong><button type="button" class="cursor-interaction" data-uma-view="tasks" aria-pressed="true"><i data-lucide="terminal" aria-hidden="true"></i><span data-i18n="tasks">Codex 任务</span></button><button type="button" class="cursor-interaction" data-uma-view="races" aria-pressed="false"><i data-lucide="trophy" aria-hidden="true"></i><span data-i18n="races">GⅠ 赛程</span></button></div>
+          </div>
+        </nav>
+        <main class="uma-content">
+          <div class="uma-panel" data-uma-panel="tasks">
+            <div class="uma-ribbon"><h3><i data-lucide="flag" aria-hidden="true"></i><span data-i18n="taskCompanion">任务陪伴</span></h3><span class="uma-connection" data-uma-connection>本地连接正常</span></div>
+            <div class="uma-panel-body">
+              <div class="uma-task-meta"><span class="uma-chip" data-i18n="working">工作中</span><span data-i18n="following">自动跟随 · 当前任务</span></div>
+              <h2 class="uma-task-title">制作フォーエバーヤング桌宠</h2>
+              <div class="uma-location"><i data-lucide="folder" aria-hidden="true"></i>Entertainments</div>
+              <p class="uma-retry" data-i18n="retry" hidden>记录暂忙，自动重试中。任务为上次成功读取的记录。</p>
+              <div class="uma-actions"><button type="button" class="uma-button uma-primary cursor-interaction" data-uma-action="open"><span data-i18n="openCurrent">打开当前任务</span><i data-lucide="chevron-right" aria-hidden="true"></i></button><button type="button" class="uma-button cursor-interaction" data-uma-action="reconnect" data-i18n="reconnect">重新连接</button></div>
+              <div class="uma-recent"><span><i data-lucide="check-circle-2" aria-hidden="true"></i>Titanic Kaggle 比赛</span><span data-i18n="completed">已完成</span></div>
+            </div>
+          </div>
+          <div class="uma-panel" data-uma-panel="races" hidden>
+            <div class="uma-ribbon"><h3><i data-lucide="calendar-days" aria-hidden="true"></i><span data-i18n="raceCalendar">GⅠ 赛事日历</span></h3><span class="uma-connection" data-i18n="jraSource">JRA 官方来源</span></div>
+            <div class="uma-panel-body">
+              <div class="uma-date"><strong data-i18n="nextSevenDays">未来七天</strong><span data-i18n="dateRange">10月3日—10月9日 · 日本时间</span></div>
+              <p class="uma-empty" data-i18n="noRaces">这七天没有 JRA 平地 GⅠ 赛事。</p>
+              <div class="uma-next-race"><span class="uma-grade">GⅠ</span><div><span class="uma-race-label" data-i18n="nextRace">下一场 · 所选七天之外</span><h2><span data-i18n="raceDate">10月18日</span> · 秋華賞</h2><span class="uma-location" data-i18n="raceTrack">京都 · 芝 2,000 米</span></div></div>
+              <div class="uma-source" aria-live="polite">本地缓存 · 示例更新时间 15:24</div>
+              <div class="uma-actions"><button type="button" class="uma-button uma-primary cursor-interaction" data-uma-action="refresh"><i data-lucide="refresh-cw" aria-hidden="true"></i><span data-i18n="refresh">刷新官网</span></button><button type="button" class="uma-button cursor-interaction" data-uma-action="clear" data-i18n="clearCache">清理缓存</button></div>
+            </div>
+          </div>
+          <div class="uma-feedback" aria-live="polite"></div>
+          <footer class="uma-footer"><span data-uma-footer>本机状态联动 · 审批请在 Codex 操作</span><span>キャラクター © Cygames · 非公式アプリ</span></footer>
+        </main>
+      </div>
+    </section>
+    <section data-variant="极简专业" data-ui-surface="minimal" aria-label="极简专业概念" hidden>
+      <div class="pet-mock pet-minimal" aria-label="极简专业设计">
+        <header class="pet-chrome"><div><strong>フォーエバーヤング</strong><small>Forever Young</small></div>
+          <div class="fy-settings-anchor"><button type="button" class="fy-settings-button cursor-interaction" data-open-settings data-i18n-label="settings" aria-label="设置" aria-expanded="false" aria-controls="fy-minimal-settings"><i data-lucide="settings" aria-hidden="true"></i><span class="fy-settings-word" data-i18n="settings">设置</span></button>
+            <aside id="fy-minimal-settings" class="fy-settings" data-i18n-label="settings" aria-label="设置" hidden>
+              <div class="fy-popover-heading"><strong data-i18n="settings">设置</strong><button type="button" class="fy-close cursor-interaction" data-close-settings data-i18n-label="closeSettings" aria-label="关闭设置"><i data-lucide="x" aria-hidden="true"></i></button></div>
+              <label for="fy-minimal-style" data-i18n="appearance">外观风格</label><select id="fy-minimal-style" class="fy-style-select" data-ui-style><option value="anime" data-i18n="animeStyle">二次元 · Anime</option><option value="minimal" data-i18n="minimalStyle">极简 · Minimal</option></select>
+              <div class="fy-language"><label for="fy-minimal-language" data-i18n="language">功能语言</label><select id="fy-minimal-language" class="fy-style-select" data-ui-language><option value="zh">简体中文</option><option value="ja">日本語</option><option value="en">English</option></select></div>
+            </aside>
+          </div>
+        </header>
+        <div class="pet-workspace"><nav class="pet-nav" data-i18n-label="navigation" aria-label="功能"><button class="pet-nav-item cursor-interaction" data-view="tasks" aria-pressed="true"><i data-lucide="terminal" aria-hidden="true"></i>Codex</button><button class="pet-nav-item cursor-interaction" data-view="races" aria-pressed="false"><i data-lucide="calendar-days" aria-hidden="true"></i><span data-i18n="racesShort">赛事</span></button>
+            <div class="fy-module-control"><button type="button" class="fy-modules-button cursor-interaction" data-open-modules data-i18n-label="features" aria-label="全部功能" aria-expanded="false" aria-controls="fy-minimal-modules"><i data-lucide="layout-grid" aria-hidden="true"></i><span class="fy-modules-word" data-i18n="features">全部功能</span></button>
+              <div id="fy-minimal-modules" class="fy-module-menu" data-i18n-label="features" aria-label="全部功能" hidden><strong data-i18n="features">全部功能</strong><button type="button" class="cursor-interaction" data-view="tasks" aria-pressed="true"><i data-lucide="terminal" aria-hidden="true"></i><span data-i18n="tasks">Codex 任务</span></button><button type="button" class="cursor-interaction" data-view="races" aria-pressed="false"><i data-lucide="calendar-days" aria-hidden="true"></i><span data-i18n="races">GⅠ 赛程</span></button></div>
+            </div>
+          </nav>
+          <main class="pet-content">
+            <div data-panel="tasks">
+              <div class="pet-line"><h3 data-i18n="currentTask">当前任务</h3><span class="pet-status" data-connection>本地连接正常</span></div>
+              <div class="pet-task"><h2>制作フォーエバーヤング桌宠</h2><span class="pet-secondary">Entertainments</span><div class="pet-period" data-i18n="workFollowing">工作中 · 自动跟随</div></div>
+              <p class="pet-retry" data-i18n="retry" hidden>记录暂时繁忙，正在重试。显示上次读取的任务。</p>
+              <div class="pet-actions"><button class="pet-button pet-main cursor-interaction" data-action="open" data-i18n="openTask">打开任务</button><button class="pet-button cursor-interaction" data-action="reconnect" data-i18n="reconnectShort">重连</button></div>
+              <div class="pet-subtitle" data-i18n="recentTasks">最近任务</div><div class="pet-task-row"><span>Titanic Kaggle 比赛</span><span class="pet-secondary" data-i18n="completed">已完成</span></div><footer class="pet-footer" data-i18n="taskFooter">本地连接 · 审批请在 Codex 中操作</footer>
+            </div>
+            <div data-panel="races" hidden>
+              <h3 data-i18n="nextSevenDays">未来七天</h3><div class="pet-period" data-i18n="dateRange">10月3日—10月9日 · 日本时间</div><p data-i18n="noRaces">暂无 JRA 平地 GⅠ 赛事。</p>
+              <div class="pet-race"><div class="pet-eyebrow" data-i18n="nextRace">下一场 · 范围之外</div><h2>秋華賞</h2><div class="pet-line"><span data-i18n="raceDate">10月18日</span><span class="pet-secondary" data-i18n="raceTrack">京都 · 芝 2,000 米</span></div></div>
+              <div class="pet-source" aria-live="polite">本地缓存 · 示例更新时间 15:24</div><div class="pet-actions"><button class="pet-button pet-main cursor-interaction" data-action="refresh" data-i18n="refresh">刷新官网</button><button class="pet-button cursor-interaction" data-action="clear" data-i18n="clearCache">清理缓存</button></div><footer class="pet-footer" data-i18n="sourceFooter">官方来源 · 缓存五分钟</footer>
+            </div><div class="pet-feedback" aria-live="polite"></div>
+          </main>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<dialog id="fy-connection-guide" class="fy-guide" aria-labelledby="fy-guide-title">
+  <div class="fy-popover-heading"><h2 id="fy-guide-title" data-i18n="guideTitle">使用手册</h2><button type="button" class="fy-close" data-command="closeGuide" data-i18n-label="closeGuide" aria-label="关闭使用手册">×</button></div>
+  <nav class="fy-manual-tabs" data-i18n-label="navigation" aria-label="功能">
+    <button type="button" data-manual-page="basics" aria-pressed="true" data-i18n="manualBasics">桌宠使用</button>
+    <button type="button" data-manual-page="codex" aria-pressed="false">Codex</button>
+    <button type="button" data-manual-page="vscode" aria-pressed="false">VS Code</button>
+    <button type="button" data-manual-page="pycharm" aria-pressed="false">PyCharm</button>
+  </nav>
+  <section data-manual-panel="basics"><div data-manual-body="basics"></div></section>
+  <section data-manual-panel="codex" hidden>
+    <div data-manual-body="codex"></div>
+    <div class="fy-guide-status" data-guide-status role="status"></div>
+    <dl><dt data-i18n="dataFolder"></dt><dd data-guide-home></dd><dt data-i18n="lastCheck"></dt><dd data-guide-check></dd></dl>
+    <p class="fy-guide-detail" data-guide-detail></p>
+    <label class="fy-link-toggle"><input type="checkbox" data-toggle-codex><span data-i18n="toggleLink"></span></label>
+    <div class="fy-actions"><button type="button" class="fy-action fy-primary" data-command="reconnect" data-i18n="checkConnection">检查连接</button><button type="button" class="fy-action" data-command="openCodex" data-i18n="openCodex">打开 Codex</button></div>
+    <p class="fy-guide-detail" data-guide-official role="status"></p>
+    <div class="fy-actions"><button type="button" class="fy-action" data-command="officialConnect" data-i18n="officialConnect">检查官方通道</button></div>
+  </section>
+  <section data-manual-panel="vscode" hidden><div data-manual-body="vscode"></div></section>
+  <section data-manual-panel="pycharm" hidden><div data-manual-body="pycharm"></div></section>
+</dialog>
+</body></html>

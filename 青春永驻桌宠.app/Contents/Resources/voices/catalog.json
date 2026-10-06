@@ -1,0 +1,253 @@
+{
+  "version": 1,
+  "character": "foreveryoung",
+  "verifiedAt": "2026-10-06",
+  "verification": "角色专属游戏语音合集与统一角色画面；128.24875 秒的原官网语音波形相关系数 0.72579；两次本地日语转写及静音边界复核。转写只辅助选择，不以同 CV 作为角色身份依据。 v3.6.1 使用用户再次确认的同一合集，增补 8 段完整短句，并复核剪辑后的转写。",
+  "clips": [
+    {
+      "id": "hello",
+      "character": "foreveryoung",
+      "file": "voices/hello.wav",
+      "text": "Hello",
+      "contexts": [
+        "click"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 42.87,
+      "end": 43.68,
+      "sha256": "dc43f049456d1f4536af07515cdfbc54aa4a4d3c971a1480041b71223a2c8c8d"
+    },
+    {
+      "id": "morning",
+      "character": "foreveryoung",
+      "file": "voices/morning.wav",
+      "text": "Good morning",
+      "contexts": [
+        "click"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 41.7,
+      "end": 42.82,
+      "sha256": "8b5dc81f232c4665e1c171242a17bf48e25e5ad6f1e58ee8c3b60cfbaffdaf38",
+      "hours": [
+        6,
+        11
+      ]
+    },
+    {
+      "id": "evening",
+      "character": "foreveryoung",
+      "file": "voices/evening.wav",
+      "text": "Good evening",
+      "contexts": [
+        "click"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 43.72,
+      "end": 44.88,
+      "sha256": "f8c33a7d2bbe90facac728f93769a4d877ab4bbc9bb109350f998e1ce4e776ea",
+      "hours": [
+        17,
+        23
+      ]
+    },
+    {
+      "id": "start",
+      "character": "foreveryoung",
+      "file": "voices/start.wav",
+      "text": "やったるか",
+      "contexts": [
+        "working"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 64.65,
+      "end": 65.75,
+      "sha256": "13e3e65fa601cb43b9d2da3657412e9c4e9936360a432458f857f6056d804343"
+    },
+    {
+      "id": "encourage",
+      "character": "foreveryoung",
+      "file": "voices/encourage.wav",
+      "text": "ファイト",
+      "contexts": [
+        "working"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 131.11,
+      "end": 132.03,
+      "sha256": "95c2121da948807244a13fe8f023b3b41e8f737d1d7a89d637f918e5f7525197"
+    },
+    {
+      "id": "great",
+      "character": "foreveryoung",
+      "file": "voices/great.wav",
+      "text": "すごいじゃん",
+      "contexts": [
+        "completed"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 120.58,
+      "end": 121.83,
+      "sha256": "64a8d0acf41ad387aac64c4d4ecc71a08deba6ad464bb151fb8d7f4e6ee47999"
+    },
+    {
+      "id": "nice",
+      "character": "foreveryoung",
+      "file": "voices/nice.wav",
+      "text": "いいじゃん",
+      "contexts": [
+        "completed"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 179.5,
+      "end": 180.68,
+      "sha256": "f440554341d8288c5097d0c83eeb930fdb82fcf55342f9e7e113cd10cf2b5aba"
+    },
+    {
+      "id": "surprise",
+      "character": "foreveryoung",
+      "file": "voices/surprise.wav",
+      "text": "マジ？",
+      "contexts": [
+        "failed",
+        "interrupted"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 22.22,
+      "end": 22.97,
+      "sha256": "9e020f69a7a9fc665011fc71b3d66b1b1c58fea3b553d0f3809ee4090f3884bd"
+    },
+    {
+      "id": "official",
+      "character": "foreveryoung",
+      "file": "official-voice.mp3",
+      "text": "官网原始角色语音",
+      "contexts": [
+        "click"
+      ],
+      "source": "https://umamusume.jp/character/foreveryoung",
+      "sourceKind": "official-character-page",
+      "sha256": "8c59585ae51548a129058ddbb6b2bb4873977f34500c2d878b4455633f9a15bb"
+    },
+    {
+      "id": "hey",
+      "character": "foreveryoung",
+      "file": "voices/hey.wav",
+      "text": "ねえねえ",
+      "contexts": [
+        "click"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 52.17,
+      "end": 52.9,
+      "sha256": "05c050ecb3a078006c124af350a9118147e13e2cb0fe98323699db568fbf3129"
+    },
+    {
+      "id": "promise",
+      "character": "foreveryoung",
+      "file": "voices/promise.wav",
+      "text": "やってみせるよ",
+      "contexts": [
+        "working"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 80.02,
+      "end": 81.2,
+      "sha256": "4560f5b6c937e35f0beaa8db16cfe2c6fe9654a6bc7e16fed986ea78c3edbeff"
+    },
+    {
+      "id": "lets-go",
+      "character": "foreveryoung",
+      "file": "voices/lets-go.wav",
+      "text": "行こっか",
+      "contexts": [
+        "working"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 100.72,
+      "end": 101.67,
+      "sha256": "99f036938002cadb8856cf93f5e472cc623bce2fcb5a136e3290dfbc2707317a"
+    },
+    {
+      "id": "go-go",
+      "character": "foreveryoung",
+      "file": "voices/go-go.wav",
+      "text": "いけいけいけ",
+      "contexts": [
+        "working"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 133.16,
+      "end": 134.9,
+      "sha256": "a09321b6f017232329ab44403f6fc1ee7ab213683004cc001b2d8c8c7ffa6631"
+    },
+    {
+      "id": "well-done",
+      "character": "foreveryoung",
+      "file": "voices/well-done.wav",
+      "text": "おつー",
+      "contexts": [
+        "completed"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 141.6,
+      "end": 142.53,
+      "sha256": "6a0c890311c434b703012456123e1ffa855c6695247f931c0b6ce4745cf50c64"
+    },
+    {
+      "id": "congrats",
+      "character": "foreveryoung",
+      "file": "voices/congrats.wav",
+      "text": "おめでと",
+      "contexts": [
+        "completed"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 143.6,
+      "end": 144.52,
+      "sha256": "d20a7810c6b9af05ccaa05e796bdb4ff1a51f3bd1af675ac2dbf03fc0967b683"
+    },
+    {
+      "id": "thanks",
+      "character": "foreveryoung",
+      "file": "voices/thanks.wav",
+      "text": "お疲れさまです",
+      "contexts": [
+        "completed"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 142.52,
+      "end": 143.72,
+      "sha256": "6ca96ec0bd19066819784283f8a627ed151ddf0bdb5eef35ac8dd2491aeb8b31"
+    },
+    {
+      "id": "good",
+      "character": "foreveryoung",
+      "file": "voices/good.wav",
+      "text": "いいね",
+      "contexts": [
+        "completed"
+      ],
+      "source": "https://www.bilibili.com/video/BV1tFfCBEEEn/",
+      "sourceKind": "game-voice-recording",
+      "start": 178.48,
+      "end": 179.49,
+      "sha256": "47a9e521caae3cfd21491ee18281615fa006ce0f6fe2b0fd4a5f2327352067c1"
+    }
+  ]
+}
