@@ -189,7 +189,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             panel.orderFrontRegardless()
         } catch {
             let alert = NSAlert()
-            alert.messageText = "无法加载青春永驻桌宠"
+            alert.messageText = "无法加载 Forever Young"
             alert.informativeText = "请保留完整的 .app 文件。\n\(error.localizedDescription)"
             alert.runModal()
             NSApp.terminate(nil)
@@ -209,7 +209,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         panel = PetPanel(contentRect: NSRect(origin: origin, size: size),
                          styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-        panel.title = "フォーエバーヤング · Desktop v3.7"
+        panel.title = "フォーエバーヤング · Desktop v3.7.2"
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = false
@@ -230,14 +230,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.bubbles?.composeTarget = self.composingThread.map { "Codex · " + $0.title + " · " + $0.cwd } ?? "Codex · 请先选择跟随任务"
         }
         bubbles?.onSend = { [weak self] text, completion in self?.sendToTrackedCodex(text,completion:completion) }
-        bubbles?.onRun = { [weak self] in self?.showIntegrations() }
+        bubbles?.onRun = { [weak self] in self?.runDefaultShortcut() }
         bubbles?.onLinks = { [weak self] in self?.showIntegrations() }
         petView = PetView(frame: NSRect(origin: .zero, size: size))
         petView.autoresizingMask = [.width, .height]
         petView.toolTip = "点击问候 · 拖动移动 · 右键打开菜单"
         petView.setAccessibilityElement(true)
         petView.setAccessibilityRole(.button)
-        petView.setAccessibilityLabel("青春永驻桌宠")
+        petView.setAccessibilityLabel("Forever Young")
         petView.greet = { [weak self] in
             guard let self = self else { return }
             self.greet(); self.codexConnection.refresh()
@@ -261,7 +261,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func createMenus() {
         let menu = NSMenu()
-        let title = NSMenuItem(title: "フォーエバーヤング · 桌面版 v3.7", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: "フォーエバーヤング · 桌面版 v3.7.2", action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
         menu.addItem(.separator())
@@ -312,7 +312,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         petView.menu = menu
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.title = "🐎"
-        statusItem.button?.toolTip = "フォーエバーヤング v3.7 · Codex · IDE · GⅠ"
+        statusItem.button?.toolTip = "フォーエバーヤング v3.7.2 · Codex · IDE · GⅠ"
         statusItem.menu = menu
     }
 
@@ -480,7 +480,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         localCodexSequence += 1
         var event = LinkedEvent(version:1,source:.codex,instance:localCodexInstance,sequence:localCodexSequence,sentAt:Date().timeIntervalSince1970*1000,state:merged.activity,
                                 runID:(merged.selected?.id ?? "") + (officialCodex.activeTurns[merged.selected?.id ?? ""] ?? merged.selected?.turnID ?? ""),title:merged.selected?.title ?? "Codex",project:merged.selected?.cwd ?? "",activeCount:[CodexActivity.working,.waiting,.review].contains(merged.activity) ? 1 : 0)
-        event.metadata = ["threadID":merged.selected?.id ?? "","pluginVersion":"built-in 3.7","runtime":officialCodex.object["transport"] as? String ?? ""]
+        event.metadata = ["threadID":merged.selected?.id ?? "","pluginVersion":"built-in 3.7.2","runtime":officialCodex.object["transport"] as? String ?? ""]
         integrations.receive(event,notify:previousID == merged.selected?.id || !merged.activity.isTransient)
         _ = codexAnimationLink.update(merged, enabled:codexEnabled)
         if externalStateUntil == 0 { applyCodexState(codexEnabled ? integrations.selected?.animation ?? .idle : .idle) }
@@ -557,6 +557,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         codexCard?.renderIntegrations(integrations.object,official:officialCodex.object)
         refreshTools()
     }
+    private func runDefaultShortcut() {
+        ideBridge.poll(); integrations.expire()
+        guard (integrations.frontmost ?? integrations.selectedSource) == .vscode,
+              let target = integrations.latest(.vscode), target.supportedActions.contains("runFile"),
+              let file = target.metadata?["file"], !file.isEmpty,
+              let token = target.metadata?["fileToken"], !token.isEmpty else { showIntegrations(); return }
+        runLinkedAction("runFile", source:.vscode, instance:target.instance, expectedToken:token)
+    }
     @objc private func showIntegrations() {
         let card = workspace(); workspacePage = .integrations; card.selectPage(.integrations)
         integrationsChanged(); card.show(near:panel.frame)
@@ -589,7 +597,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 if ["run","runFile","build","test"].contains(action) && expectedToken == nil { showIntegrations(); return }
                 try ideBridge.command(action,target:target,expectedToken:expectedToken)
                 let language = defaults.string(forKey:"uiLanguage") ?? "zh"
-                let hint = action == "stop"
+                let hint = action == "runFile"
+                    ? ["zh":"已请求运行当前文件，请在 VS Code 终端输入数据。","ja":"現在のファイルを要求しました。入力は VS Code のターミナルで。","en":"Current-file run requested. Enter input in the VS Code terminal."]
+                    : action == "stop"
                     ? ["zh":"请在 IDE 确认要停止的任务。","ja":"IDE で停止するタスクを確認してください。","en":"Confirm the task to stop in the IDE."]
                     : ["zh":"已请求操作；首次选定目标后可重复运行。","ja":"操作を要求しました。選択した対象は再利用します。","en":"Action requested. Selected targets are remembered."]
                 bubbles?.showMessage("\(target.source.label) · \(hint[language] ?? hint["zh"]!)")

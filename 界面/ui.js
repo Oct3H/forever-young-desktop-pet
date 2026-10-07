@@ -210,6 +210,9 @@
     anchor.after(panel);
     const linked=document.createElement('div');linked.className=anime?'uma-panel':'fy-integration-panel';linked.setAttribute(anime?'data-uma-panel':'data-panel','integrations');linked.hidden=true;panel.after(linked);
   }
+  Object.assign(translations.zh,{runCpp:'编译并运行当前文件',advancedRun:'高级工程操作（可选）',practiceHint:'默认运行当前文件，无需选择工程目标。运行前自动保存，输入数据请使用 VS Code 终端。',pluginUpgrade:'请更新 VS Code 3.7.1／PyCharm 3.7.0 联动插件。'});
+  Object.assign(translations.ja,{runCpp:'現在のファイルをビルドして実行',advancedRun:'高度なプロジェクト操作（任意）',practiceHint:'既定は現在のファイルを実行。対象選択は不要です。保存後、入力は VS Code のターミナルで行います。',pluginUpgrade:'VS Code 3.7.1／PyCharm 3.7.0 の連携プラグインを更新してください。'});
+  Object.assign(translations.en,{runCpp:'Compile and run current file',advancedRun:'Advanced project actions (optional)',practiceHint:'Run the current file by default, without choosing a project target. The file is saved first; enter input in the VS Code terminal.',pluginUpgrade:'Update the VS Code 3.7.1 / PyCharm 3.7.0 bridge plugins.'});
   function renderIntegrations() {
     const integration=data.integrations || {primary:'auto',selected:'codex',sources:[]};
     const sourceName=value=>({codex:'Codex',vscode:'VS Code',pycharm:'PyCharm'}[value] || text('noneSelected'));
@@ -219,17 +222,24 @@
     content+=(integration.sources || []).map(source=>`<article class="fy-source-card fy-${escape(source.source)} ${operation===source.source?'fy-operation-selected':''}"><button type="button" class="fy-source-select" data-linked-source="${escape(source.source)}" aria-pressed="${operation===source.source}"><span class="fy-thread-heading"><strong>${escape(source.label)}</strong><span>${escape(source.connected?activity(source.state):text('notConnected'))}</span></span><strong class="fy-source-title">${escape(source.title || '—')}</strong><span class="fy-location">${escape(source.project || '')}</span><small>${Number(source.activeCount)||0} ${escape(text('liveRuns'))}${integration.selected===source.source?' · '+escape(text('primaryBadge')):''}</small></button></article>`).join('');
     const source=(integration.sources || []).find(source=>source.source===operation);
     const actions=source?.actions || ['run','build','test','stop'];
-    const linkedButton=(key,action,primary=false)=>button(key,'linkedAction',`data-action="${action}" data-source="${operation}" ${source?.metadata?.[action==='runFile'?'fileToken':action+'Token']?`data-expected-token="${escape(source.metadata[action==='runFile'?'fileToken':action+'Token'])}"`:''} ${source?.instance?`data-instance="${escape(source.instance)}"`:''} ${source?.connected && actions.includes(action) && (!['run','runFile','build','test'].includes(action) || source?.metadata?.pluginVersion==='3.7.0')?'':'disabled'}`,primary);
-    let controls;
+    const linkedButton=(key,action,primary=false)=>button(key,'linkedAction',`data-action="${action}" data-source="${operation}" ${source?.metadata?.[action==='runFile'?'fileToken':action+'Token']?`data-expected-token="${escape(source.metadata[action==='runFile'?'fileToken':action+'Token'])}"`:''} ${source?.instance?`data-instance="${escape(source.instance)}"`:''} ${source?.connected && actions.includes(action) && (!['run','runFile','build','test'].includes(action) || ['3.7.0','3.7.1'].includes(source?.metadata?.pluginVersion))?'':'disabled'}`,primary);
+    let controls,advanced="";
     if(operation==='codex') controls=button('sendCodex','codexCompose','',true)+button('runCodex','codexCompose','data-preset="run"')+button('testCodex','codexCompose','data-preset="test"')+button('reviewCodex','codexCompose','data-preset="review"')+button('stopLinked','linkedAction','data-action="stop" data-source="codex"');
-    else controls=linkedButton('runLinked','run',true)+linkedButton('chooseRun','chooseRun')+(operation==='vscode'?linkedButton('runFile','runFile')+linkedButton('buildLinked','build'):'')+linkedButton('testLinked','test')+linkedButton('stopLinked','stop');
+    else if(operation==='vscode') {
+      controls=linkedButton(/\.(c|cc|cpp|cxx)$/i.test(source?.metadata?.file || '')?'runCpp':'runFile','runFile',true)+linkedButton('stopLinked','stop');
+      advanced=linkedButton('runLinked','run')+linkedButton('chooseRun','chooseRun')+linkedButton('buildLinked','build')+linkedButton('testLinked','test');
+    } else controls=linkedButton('runLinked','run',true)+linkedButton('chooseRun','chooseRun')+linkedButton('testLinked','test')+linkedButton('stopLinked','stop');
     if(operation!=='codex') {
       const m=source?.metadata || {};
       const labels={zh:['将运行的目标','当前文件','当前文件解释器 / 编译器','首次需在 IDE 选择目标','打开问题面板','打开控制台'],ja:['実行予定の対象','現在のファイル','現在のファイルの実行環境','初回は IDE で対象を選択','問題パネル','コンソール'],en:['Target to run','Current file','Current-file interpreter / compiler','Choose in IDE on first use','Open Problems','Open console']}[state.language];
-      content+=`<div class="fy-run-preview"><strong>${escape(labels[0])}</strong><p>${escape(m.runTarget || labels[3])}</p><small>${escape(source?.project || '')}</small><dl><dt>${escape(labels[1])}</dt><dd>${escape(m.file || '—')}</dd><dt>${escape(labels[2])}</dt><dd>${escape(m.runtime || '—')}</dd>${operation==='vscode'?`<dt>Build</dt><dd>${escape(m.buildTarget || labels[3])}</dd>`:''}<dt>Test</dt><dd>${escape(m.testTarget || labels[3])}</dd></dl></div>`;
-      controls+=linkedButton(labels[4],'openProblems')+linkedButton(labels[5],'openConsole');
+      const projectPreview=`<strong>${escape(labels[0])}</strong><p>${escape(m.runTarget || labels[3])}</p><dl>${operation==='vscode'?`<dt>Build</dt><dd>${escape(m.buildTarget || labels[3])}</dd>`:''}<dt>Test</dt><dd>${escape(m.testTarget || labels[3])}</dd></dl>`;
+      content+=`<div class="fy-run-preview">${operation==='vscode'?`<strong>${escape(text('runFile'))}</strong><p>${escape(m.file || '—')}</p>`:projectPreview}<small>${escape(source?.project || '')}</small><dl><dt>${escape(labels[1])}</dt><dd>${escape(m.file || '—')}</dd><dt>${escape(labels[2])}</dt><dd>${escape(m.runtime || '—')}</dd></dl>${operation==='vscode'?`<p class="fy-race-label">${escape(text('practiceHint'))}</p>`:''}</div>`;
+      if(operation==='vscode') {
+        controls+=linkedButton(labels[5],'openConsole');
+        advanced=`<details class="fy-vscode-advanced" data-advanced-vscode ${state.vscodeAdvancedOpen?'open':''}><summary data-vscode-advanced-toggle>${escape(text('advancedRun'))}</summary><div class="fy-run-preview">${projectPreview}</div><div class="fy-actions">${advanced+linkedButton(labels[4],'openProblems')}</div></details>`;
+      } else controls+=linkedButton(labels[4],'openProblems')+linkedButton(labels[5],'openConsole');
     }
-    content+=`<div class="fy-operation-controls" data-linked-controls="${operation}"><h4>${escape(text('operationTarget'))} · ${escape(sourceName(operation))}</h4><p class="fy-race-label">${escape(text('operationHint'))}</p><div class="fy-actions">${controls}</div>${operation!=='codex' && source?.connected && source?.metadata?.pluginVersion!=='3.7.0'?`<p class="fy-notice">${escape(text('pluginUpgrade'))}</p>`:''}</div>`;
+    content+=`<div class="fy-operation-controls" data-linked-controls="${operation}"><h4>${escape(text('operationTarget'))} · ${escape(sourceName(operation))}</h4><p class="fy-race-label">${escape(text('operationHint'))}</p><div class="fy-actions">${controls}</div>${advanced}${operation!=='codex' && source?.connected && !['3.7.0','3.7.1'].includes(source?.metadata?.pluginVersion)?`<p class="fy-notice">${escape(text('pluginUpgrade'))}</p>`:''}</div>`;
     root.querySelector('[data-uma-panel=integrations]').innerHTML=`<div class="uma-ribbon"><h3>${icon('terminal')}<span>${escape(text('integrations'))}</span></h3></div><div class="uma-panel-body">${content}</div>`;
     root.querySelector('[data-panel=integrations]').innerHTML=`<h3>${escape(text('integrations'))}</h3>${content}`;
     root.querySelectorAll('.fy-settings [data-primary-integration]').forEach(select=>select.value=integration.primary);
@@ -324,6 +334,8 @@
     state.page = payload.page; window.petTools?.update(payload.tools); render();
   }};
   root.addEventListener('click',event => {
+    const advancedToggle=event.target.closest('[data-vscode-advanced-toggle]');
+    if(advancedToggle){state.vscodeAdvancedOpen=!advancedToggle.parentElement.open;return;}
     const target = event.target.closest('button');
     if (!target) { if (!event.target.closest('.fy-settings,.fy-module-menu,.fy-guide')) { state.settings=false;state.modules=false;render(); } return; }
     if (target.hasAttribute('data-open-settings')) {state.settings=!state.settings;state.modules=false;render();}

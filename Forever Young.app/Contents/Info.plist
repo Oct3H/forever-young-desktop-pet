@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>青春永驻桌宠</string>
+	<string>Forever Young</string>
 	<key>CFBundleExecutable</key>
 	<string>ForeverYoungDesktop</string>
 	<key>CFBundleIconFile</key>
@@ -11,13 +11,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>org.foreveryoungpet.desktop</string>
 	<key>CFBundleName</key>
-	<string>Forever Young Desktop</string>
+	<string>Forever Young</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.7</string>
+	<string>3.7.2</string>
 	<key>CFBundleVersion</key>
-	<string>3.7</string>
+	<string>3.7.2</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>LSUIElement</key>

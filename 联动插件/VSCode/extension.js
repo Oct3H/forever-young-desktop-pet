@@ -14,7 +14,7 @@ function activate(context) {
   const active = new Map();
   let sequence = 0, current = {state:'idle',runID:'',title:'VS Code',project:vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || ''};
   const processed = new Set();
-  let metadata={pluginVersion:'3.7.0'};
+  let metadata={pluginVersion:'3.7.1'};
   const write = (folder, name, object) => {
     const target = path.join(root,folder,name+'.json'), temp = target+'.tmp';
     fs.writeFileSync(temp,JSON.stringify(object),{mode:0o600}); fs.renameSync(temp,target);
@@ -48,7 +48,7 @@ function activate(context) {
   for (const execution of vscode.tasks.taskExecutions) startTask(execution);
   if(vscode.debug.activeDebugSession) {const s=vscode.debug.activeDebugSession;active.set(s.id,s);event('working',s.id,s.name,s.workspaceFolder?.uri.fsPath || current.project);}
   const run=createRunner(vscode,context);
-  async function refresh() {try {metadata=await run.describe();publish();}catch(error){metadata={pluginVersion:'3.7.0',diagnosticError:String(error.message).slice(0,400)};publish();}}
+  async function refresh() {try {metadata=await run.describe();publish();}catch(error){metadata={pluginVersion:'3.7.1',diagnosticError:String(error.message).slice(0,400)};publish();}}
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(refresh),vscode.workspace.onDidChangeConfiguration(refresh));
   async function command(action,expectedToken) {
     if(action==='openProblems')return vscode.commands.executeCommand('workbench.actions.view.problems');

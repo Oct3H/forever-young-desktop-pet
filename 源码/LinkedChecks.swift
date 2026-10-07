@@ -52,7 +52,7 @@ func runLinkedChecks(directory: URL) throws -> [String] {
 
 extension InformationCard {
     func checkLinkedUI(defaults: UserDefaults,directory: URL) throws -> [String] {
-        let sources=LinkedSource.allCases.map { ["source":$0.rawValue,"label":$0.label,"state":"working","title":"Fixture <task>","project":"/tmp/fixture","instance":"22222222-2222-4222-8222-222222222222","activeCount":1,"connected":true,"metadata":["pluginVersion":"3.7.0","runToken":"select","fileToken":"fixture"],"actions":$0 == .vscode ? ["run","chooseRun","runFile","build","test","stop"] : ["run","chooseRun","test","stop"]] as [String:Any] }
+        let sources=LinkedSource.allCases.map { ["source":$0.rawValue,"label":$0.label,"state":"working","title":"Fixture <task>","project":"/tmp/fixture","instance":"22222222-2222-4222-8222-222222222222","activeCount":1,"connected":true,"metadata":["pluginVersion":"3.7.0","runToken":"select","fileToken":"fixture","file":"/tmp/exercise.cpp","runtime":"/usr/bin/clang++","runTarget":"Build Workspace"],"actions":$0 == .vscode ? ["run","chooseRun","runFile","build","test","stop"] : ["run","chooseRun","test","stop"]] as [String:Any] }
         var primary="auto",action="",actionSource:LinkedSource?,actionInstance:String?,preset="",officialChecks=0
         onPrimary={ value in
             primary=value
@@ -84,8 +84,16 @@ extension InformationCard {
                 try setPreferenceForCheck("data-ui-language",value:language)
                 panel.setContentSize(NSSize(width:320,height:700))
                 try awaitUI("document.documentElement.scrollWidth<=innerWidth")
-                try clickForCheck("[data-command=linkedAction][data-action=run]")
-                try require(action == "run","run button reaches native known-action handler")
+                try require(try evaluateForCheck("(() => {const p=document.querySelector('[data-ui-surface]:not([hidden]) [data-linked-controls=vscode]');return p.querySelector('.fy-actions [data-action=runFile]')!==null && !p.querySelector('[data-advanced-vscode]').open})()") as? Bool == true,"current file is visible primary and advanced project operations start collapsed")
+                try clickForCheck(".fy-actions [data-command=linkedAction][data-action=runFile]")
+                try require(action == "runFile","visible primary runs the current file through native handler")
+                try clickForCheck("[data-vscode-advanced-toggle]")
+                try awaitUI("document.querySelector('[data-ui-surface]:not([hidden]) [data-advanced-vscode]').open")
+                renderIntegrations(["primary":"auto","selected":"codex","sources":sources],official:["ready":true,"transport":"stdio"])
+                try awaitUI("document.querySelector('[data-ui-surface]:not([hidden]) [data-advanced-vscode]').open")
+                try clickForCheck("[data-advanced-vscode] [data-command=linkedAction][data-action=run]")
+                try require(action == "run","optional project run reaches native handler after expanding")
+                try clickForCheck("[data-vscode-advanced-toggle]")
                 try clickForCheck("[data-open-settings]")
                 try clickForCheck("[data-command=guide]")
                 for page in ["basics","codex","vscode","pycharm"] {
@@ -104,6 +112,6 @@ extension InformationCard {
         try clickForCheck("[data-command=codexCompose][data-preset=test]")
         try require(preset.contains("测试"),"Codex shortcut fills a reviewable prompt")
         try capture(to:directory.appendingPathComponent("integrations-minimal-en.png"))
-        return ["all three source cards and safe external text","software selection switches matching functional controls","IDE actions target the displayed source and instance","operation source survives automatic primary changes","main source summary is read-only; settings selection persists through refresh","third navigation module; connection help moved to settings","four manual sections across six style-language combinations at 320px","manual official connection checks reach native handler","native run and primary selection commands","Codex shortcut drafts"]
+        return ["all three source cards and safe external text","software selection switches matching functional controls","IDE actions target the displayed source and instance","operation source survives automatic primary changes","main source summary is read-only; settings selection persists through refresh","third navigation module; connection help moved to settings","four manual sections across six style-language combinations at 320px","manual official connection checks reach native handler","default current-file and optional project controls in six style-language combinations; expansion survives refresh","native run and primary selection commands","Codex shortcut drafts"]
     }
 }

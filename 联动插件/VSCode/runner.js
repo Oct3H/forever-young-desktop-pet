@@ -23,8 +23,8 @@ exports.createRunner=(vscode,context)=>{
     processEnd=vscode.tasks.onDidEndTaskProcess(event=>{if(matches(event))finish(event.exitCode);});
     taskEnd=vscode.tasks.onDidEndTask(event=>{if(matches(event))setTimeout(()=>finish(undefined),200);});
     context.subscriptions.push(processEnd,taskEnd);
-    const task=new vscode.Task({type:'foreverYoungFile',file,requestID},folder || vscode.TaskScope.Workspace,name,'Forever Young',new vscode.ProcessExecution(command,args,{cwd:folder?.uri.fsPath || path.dirname(file)}));
-    task.presentationOptions={reveal:vscode.TaskRevealKind.Always};
+    const task=new vscode.Task({type:'foreverYoungFile',file,requestID},folder || vscode.TaskScope.Workspace,name,'Forever Young',new vscode.ProcessExecution(command,args,{cwd:path.dirname(file)}));
+    task.presentationOptions={reveal:vscode.TaskRevealKind.Always,focus:true};
     try {await vscode.tasks.executeTask(task);}catch(error){finish(undefined);throw error;}
   }
   async function runFile() {
@@ -32,10 +32,7 @@ exports.createRunner=(vscode,context)=>{
     if(!document || document.uri.scheme!=='file') throw new Error('Open a local source file in VS Code first.');
     const file=document.uri.fsPath,extension=path.extname(file).toLowerCase();
     if(!['.py','.js','.mjs','.cjs','.c','.cc','.cpp','.cxx'].includes(extension)) throw new Error('Automatic single-file run supports Python, JavaScript, C and C++. Use a project configuration for other files.');
-    if(document.isDirty) {
-      const save=await vscode.window.showWarningMessage('Save the current file before running it?','Save and run');
-      if(save!=='Save and run' || !await document.save())return;
-    }
+    if(document.isDirty && !await document.save()) throw new Error('The current file could not be saved. Save it in VS Code before running.');
     const folder=vscode.workspace.getWorkspaceFolder(document.uri),name=path.basename(file);
     if(extension==='.py') {
       let selected;
@@ -76,7 +73,7 @@ exports.createRunner=(vscode,context)=>{
   }
   async function describe() {
     const file=vscode.window.activeTextEditor?.document?.uri;
-    const metadata={pluginVersion:'3.7.0',ideVersion:vscode.version || '',trusted:String(vscode.workspace.isTrusted),file:file?.scheme==='file'?file.fsPath:'',runtime:''};
+    const metadata={pluginVersion:'3.7.1',ideVersion:vscode.version || '',trusted:String(vscode.workspace.isTrusted),file:file?.scheme==='file'?file.fsPath:'',runtime:''};
     metadata.fileToken=crypto.createHash('sha256').update(metadata.file).digest('hex');
     if(metadata.file.endsWith('.py')) {try {metadata.runtime=await vscode.commands.executeCommand('python.interpreterPath',file) || '';}catch{};metadata.runtime=metadata.runtime || (vscode.workspace.getWorkspaceFolder(file) && executable(path.join(vscode.workspace.getWorkspaceFolder(file).uri.fsPath,'.venv','bin','python'))) || '';}
     else if(/\.(js|mjs|cjs)$/.test(metadata.file)) metadata.runtime=executable('node') || executable('/opt/homebrew/bin/node') || executable('/usr/local/bin/node') || '';

@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -eu
 project_dir="$(cd -- "$(dirname -- "$0")" && pwd)"
-app_dir="$project_dir/青春永驻桌宠.app"
+app_dir="$project_dir/Forever Young.app"
 mkdir -p "$app_dir/Contents/Resources/UI"
 cp -R "$project_dir/界面/." "$app_dir/Contents/Resources/UI/"
 cache_dir="$(mktemp -d "${TMPDIR:-/tmp/}forever-young-swift.XXXXXX")"

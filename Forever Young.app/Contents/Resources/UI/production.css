@@ -117,3 +117,6 @@ body[data-ready] #forever-young-pet-ui .fy-preview-stage{visibility:visible}
 #forever-young-pet-ui .fy-activity time{display:block;color:#708063;font-size:11px;margin-top:6px}
 #forever-young-pet-ui .fy-activity small{display:block;color:#708063;margin:8px 0}
 #forever-young-pet-ui [data-timer-minutes]{max-width:100%;width:80px;font:inherit;margin:0 10px;border:1px solid #dfe5d7;border-radius:6px;padding:8px}
+
+.fy-vscode-advanced { margin-top:16px; border-top:1px solid #d9dfd1; padding-top:12px; }
+.fy-vscode-advanced summary { cursor:pointer; font-weight:600; color:var(--fy-text,#43513b); padding:8px 0; }

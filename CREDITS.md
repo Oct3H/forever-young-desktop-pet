@@ -12,3 +12,9 @@ This is an unofficial, AI-assisted Forever Young desktop pet. Character artwork 
 - [JRA 国内 GⅠ](https://jra.jp/datafile/seiseki/replay/g1.html)、[JRA 海外赛事](https://jra.jp/keiba/overseas/)、[JAIRS](https://www.jairs.jp/)、[Breeders’ Cup](https://www.breederscup.com/)、[JBIS 历史战绩](https://www.jbis.or.jp/horse/0001339834/record/)：本机赛事查询来源。官方网页快照、个人缓存和测试资料不随公开成品发布。
 
 原始录音未合成或改变音色；没有用同 CV 的其他角色替代。核心窗口使用 Swift／AppKit，声音使用 AVFoundation，工作台使用 WebKit，赛事 PDF 使用 PDFKit；不打包 IDE SDK 类。
+
+## v3.7.2 应用图标 / App icon
+
+根目录“应用图标.png”以原角色图标为参考，由 imagegen 调整构图并放大重绘，属于非官方衍生图像；桌面动画图集、游戏立绘和语音保持原样。
+
+The launch icon is an unofficial AI-assisted derivative based on the previous character icon. The pet animation atlas, game portrait and voice recordings are unchanged.

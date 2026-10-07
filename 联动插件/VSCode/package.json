@@ -2,7 +2,7 @@
   "name": "forever-young-pet-bridge",
   "displayName": "Forever Young · Local Pet Bridge",
   "description": "Local task/debug lifecycle and explicit run controls for Forever Young desktop pet.",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "publisher": "forever-young-local",
   "engines": {
     "vscode": "^1.90.0"
