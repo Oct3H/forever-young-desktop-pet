@@ -35,6 +35,9 @@ final class PetBubbles: NSObject {
     private let statusLabel: NSTextField
     private let taskLabel: NSTextField
     private let sourceLabel: NSTextField
+    private var errorButton: NSButton!
+    private var linkedEvent: LinkedEvent?
+    var onError: ((LinkedEvent) -> Void)?
     private let greetingLabel: NSTextField
     private var actionButtons: [NSButton] = []
     private var composer: NSPanel?
@@ -86,7 +89,7 @@ final class PetBubbles: NSObject {
         sourceLabel = NSTextField(labelWithString: "")
         greetingLabel = NSTextField(labelWithString: "")
         super.init()
-        sourceLabel.frame = NSRect(x:14,y:84,width:260,height:16); sourceLabel.font = .systemFont(ofSize:10,weight:.semibold)
+        sourceLabel.frame = NSRect(x:14,y:84,width:230,height:16); sourceLabel.font = .systemFont(ofSize:10,weight:.semibold)
         sourceLabel.textColor = NSColor(calibratedWhite:0.4,alpha:1)
         statusLabel.frame = NSRect(x: 14, y: 40, width: 260, height: 42)
         statusLabel.font = .systemFont(ofSize: 13, weight: .medium); statusLabel.textColor = NSColor(calibratedWhite: 0.17, alpha: 1)
@@ -96,6 +99,8 @@ final class PetBubbles: NSObject {
         greetingLabel.frame = NSRect(x:14,y:7,width:260,height:14); greetingLabel.font = .systemFont(ofSize:10); greetingLabel.textColor = .secondaryLabelColor
         status.contentView!.addSubview(sourceLabel); status.contentView!.addSubview(greetingLabel)
         status.contentView!.addSubview(statusLabel); status.contentView!.addSubview(taskLabel)
+        errorButton = NSButton(image:NSImage(systemSymbolName:"arrow.up.right.square",accessibilityDescription:nil)!,target:self,action:#selector(openError))
+        errorButton.frame = NSRect(x:250,y:80,width:26,height:24); errorButton.bezelStyle = .inline; errorButton.isHidden = true; status.contentView!.addSubview(errorButton)
         let symbols = ["square.grid.2x2","text.bubble","play.fill","point.3.connected.trianglepath.dotted","xmark"]
         let selectors = [#selector(openDesk),#selector(openInput),#selector(runShortcut),#selector(openLinks),#selector(hideActions)]
         for (i, key) in ["desk", "input", "run", "links", "close"].enumerated() {
@@ -119,7 +124,7 @@ final class PetBubbles: NSObject {
             button.title = ""; button.toolTip = label; button.setAccessibilityLabel(label)
             button.contentTintColor = anime ? NSColor(calibratedRed:0.27,green:0.46,blue:0.13,alpha:1) : NSColor(calibratedWhite:0.24,alpha:1)
         }
-        statusLabel.stringValue = PetBubbleText.value(currentActivity.rawValue, language: language)
+        if let event = linkedEvent, status.isVisible, Date() < statusUntil { let expiry = statusUntil; let priority = statusPriority; showNotice(event); statusUntil = expiry; statusPriority = priority } else if linkedEvent == nil { statusLabel.stringValue = PetBubbleText.value(currentActivity.rawValue, language: language) }
         composer?.title = PetBubbleText.value("compose", language: language)
         hint?.stringValue = PetBubbleText.value("hint", language: language)
         copyButton?.title = PetBubbleText.value("copy", language: language)
@@ -146,17 +151,28 @@ final class PetBubbles: NSObject {
     }
     var canPresentNotice: Bool { !status.isVisible || Date() >= statusUntil || statusPriority < 70 }
     func showNotice(_ event: LinkedEvent) {
+        linkedEvent = event; errorButton.isHidden = event.metadata?["errorToken"]?.isEmpty != false
+        errorButton.toolTip = language == "zh" ? "定位最新错误" : language == "ja" ? "エラーへ移動" : "Go to latest error"
         statusPriority = 70; currentActivity = event.state; currentTitle = event.title
         lastShown = Date(); statusUntil = Date(timeIntervalSinceNow:6)
         sourceLabel.stringValue = event.source.label
         statusLabel.stringValue = PetBubbleText.value(event.state.rawValue,language:language).replacingOccurrences(of:"Codex",with:event.source.label)
+        if let phase = event.metadata?["phase"], event.source != .codex {
+            let labels = language == "zh" ? ["preparing":"准备运行…","compiling":"正在编译…","running":"程序运行中。输入请使用 IDE 控制台。","completed":"程序已结束。","interrupted":"程序已停止。"] : language == "ja" ? ["preparing":"実行準備中…","compiling":"コンパイル中…","running":"実行中。入力は IDE コンソールで。","completed":"プログラム終了。","interrupted":"停止しました。"] : ["preparing":"Preparing…","compiling":"Compiling…","running":"Program running. Enter input in the IDE console.","completed":"Program ended.","interrupted":"Program stopped."]
+            statusLabel.stringValue = labels[phase] ?? statusLabel.stringValue
+        }
+        if let summary = event.metadata?["errorSummary"], !summary.isEmpty, event.state == .failed {
+            let line = event.metadata?["errorLine"] ?? ""
+            statusLabel.stringValue = (line.isEmpty ? "" : (language == "zh" ? "第 \(line) 行：" : language == "ja" ? "\(line) 行：" : "Line \(line): ")) + summary
+            statusLabel.toolTip = summary
+        }
         taskLabel.stringValue = event.title; taskLabel.toolTip = event.title; greetingLabel.stringValue = ""
         status.orderFrontRegardless()
     }
     func showClickStatus(_ event: LinkedEvent?) {
         guard canPresentNotice else { return } // First unseen transitions always precede click/greeting text.
         if let event = event { showNotice(event) }
-        else { sourceLabel.stringValue = "Forever Young"; statusLabel.stringValue = PetBubbleText.value("idle",language:language); taskLabel.stringValue = ""; statusUntil = Date(timeIntervalSinceNow:6); status.orderFrontRegardless() }
+        else { linkedEvent = nil; errorButton.isHidden = true; sourceLabel.stringValue = "Forever Young"; statusLabel.stringValue = PetBubbleText.value("idle",language:language); taskLabel.stringValue = ""; statusUntil = Date(timeIntervalSinceNow:6); status.orderFrontRegardless() }
         statusPriority = 20
         if greetings.isEmpty { greetings = Array(0..<3).shuffled(); if greetings.first == lastGreeting { greetings.reverse() } }
         lastGreeting = greetings.removeFirst()
@@ -164,6 +180,7 @@ final class PetBubbles: NSObject {
         greetingLabel.stringValue = lines[lastGreeting]
     }
     func showMessage(_ message: String) {
+        linkedEvent = nil; errorButton.isHidden = true
         statusPriority = 70; sourceLabel.stringValue = "Forever Young"; statusLabel.stringValue = message
         taskLabel.stringValue = ""; greetingLabel.stringValue = ""; statusUntil = Date(timeIntervalSinceNow:8); status.orderFrontRegardless()
     }
@@ -191,6 +208,7 @@ final class PetBubbles: NSObject {
         if actions.isVisible || status.isVisible { position(near: pet) }
     }
     @objc private func openDesk() { hideActions(); onWorkspace?() }
+    @objc private func openError() { if let event = linkedEvent { onError?(event) } }
     @objc private func runShortcut() { hideActions(); onRun?() }
     @objc private func openLinks() { hideActions(); onLinks?() }
     @objc private func hideActions() { actions.orderOut(nil); actionsUntil = .distantPast }
@@ -245,7 +263,7 @@ final class PetBubbles: NSObject {
 
 extension PetBubbles {
     func checkNativeBubbles(directory: URL) throws -> [String] {
-        let id = "00000000-0000-4000-8000-000000000001"
+        let id = "01a0fae6-ac9f-7820-ad67-8d7a422d5752"
         let thread = CodexThreadSummary(id: id, title: "气泡验证任务", cwd: "/tmp", rollout: directory.appendingPathComponent("fixture.jsonl"), turnID: "test", turnStatus: "inProgress", startedAt: 0)
         let completed = CodexSnapshot(connected: true, threads: [thread], selected: thread, activity: .completed, message: "fixture")
         update(completed, enabled: true)

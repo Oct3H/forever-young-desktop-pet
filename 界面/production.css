@@ -120,3 +120,5 @@ body[data-ready] #forever-young-pet-ui .fy-preview-stage{visibility:visible}
 
 .fy-vscode-advanced { margin-top:16px; border-top:1px solid #d9dfd1; padding-top:12px; }
 .fy-vscode-advanced summary { cursor:pointer; font-weight:600; color:var(--fy-text,#43513b); padding:8px 0; }
+
+#forever-young-pet-ui .fy-window-select{display:block;font-size:12px;margin-top:14px}#forever-young-pet-ui .fy-window-select select{width:100%;margin-top:6px;padding:9px;border:1px solid #dce4d1;border-radius:8px;color:#46583d;background:#fff}#forever-young-pet-ui .fy-version-row{border-top:1px solid #dce4d1;padding:10px 0;font-size:12px}

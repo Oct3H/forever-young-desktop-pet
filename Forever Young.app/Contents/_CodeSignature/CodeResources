@@ -8,6 +8,14 @@
 		<data>
 		C7eJpDUDYFK15/UlS1ic0YhQHJQ=
 		</data>
+		<key>Resources/Bridges/forever-young-pycharm-3.8.0.zip</key>
+		<data>
+		zrHg9Ea8L7kOCYboPmhXATPtEig=
+		</data>
+		<key>Resources/Bridges/forever-young-vscode-3.8.0.vsix</key>
+		<data>
+		cppXqTsARR/rZX8bT46IJadX7Hk=
+		</data>
 		<key>Resources/UI/character.webp</key>
 		<data>
 		DtjS1X3dszAWTt8NOh2eYdfuRC8=
@@ -70,15 +78,15 @@
 		</data>
 		<key>Resources/UI/manual.js</key>
 		<data>
-		1OYfuwW7OZNp079WOzo1uYskikc=
+		aIQI0kBAgXmZ4a/dKE/e60EOHmk=
 		</data>
 		<key>Resources/UI/production.css</key>
 		<data>
-		4cHtT4/AQQ1ZBjKD5d21KPjn7aE=
+		JMhfDBMQNN/cFNyDgXGtrzBqFPk=
 		</data>
 		<key>Resources/UI/tools.js</key>
 		<data>
-		X+237BdfnXLZj/37f23ktYv/SN4=
+		uP2uuK+7BUwH/ZfXSE2WNvLZX4w=
 		</data>
 		<key>Resources/UI/ui.css</key>
 		<data>
@@ -86,7 +94,7 @@
 		</data>
 		<key>Resources/UI/ui.js</key>
 		<data>
-		JW1LZn2Ki7LQOPL1z76Xd4gYx00=
+		yB4ZiEvwxgmahdZRcJnXA22tebg=
 		</data>
 		<key>Resources/official-voice.mp3</key>
 		<data>
@@ -167,11 +175,34 @@
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>MacOS/VersionSwitch</key>
+		<dict>
+			<key>cdhash</key>
+			<data>
+			sjj1N2Z6sviupoBgG5IIVcei2vY=
+			</data>
+			<key>requirement</key>
+			<string>cdhash H"b238f537667ab2f8aea680601b920855c7a2daf6"</string>
+		</dict>
 		<key>Resources/AppIcon.icns</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			Rv7vPqwKubtRzkaD4MZkCb+nanghEv705DFlSaibiUI=
+			</data>
+		</dict>
+		<key>Resources/Bridges/forever-young-pycharm-3.8.0.zip</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			jOYnHK6SBLkfram4MA9Vr4FDNu+4zcWsnM1uOoWHZBE=
+			</data>
+		</dict>
+		<key>Resources/Bridges/forever-young-vscode-3.8.0.vsix</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			o+PuvIYENJ6VAe/tqM+JOerngG0z3oHoJyLAww24lAo=
 			</data>
 		</dict>
 		<key>Resources/UI/character.webp</key>
@@ -283,21 +314,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			0bV/xE12wOoD1oo50Xuso2U/ZOtZX4lOOj8wloOlCM8=
+			nPO6v789lRvmikeLuh5RxyZFsSHSIPjLVVVmkkNyOI4=
 			</data>
 		</dict>
 		<key>Resources/UI/production.css</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			q1S2jpn8BC9oNhGHoD/eJPhSqo2doYZxNNvUErShYF0=
+			1/F2m4omnVYkCmX0DUcH2kl9WeDXf6bU7byPLWXueRk=
 			</data>
 		</dict>
 		<key>Resources/UI/tools.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			JSipX5f2JlLlhcOeJm3lVu+cP34KuhGe2FNeLvNUZqw=
+			26Qt3xdn3OnAeyHoywmi0NqSvIPklZspr9ZK1jsBk+0=
 			</data>
 		</dict>
 		<key>Resources/UI/ui.css</key>
@@ -311,7 +342,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			ED7Z83Mz3y7dxUSQUx/hQ8Jtf9p5h3ndgW6SoVdLNxc=
+			x/CK55Cc7fg49K6Sa1ZfYbdSGdiDk+DQXemEUSsIJTg=
 			</data>
 		</dict>
 		<key>Resources/official-voice.mp3</key>

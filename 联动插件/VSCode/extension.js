@@ -5,7 +5,7 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 const {createRunner}=require('./runner');
-const actions=['run','chooseRun','runFile','build','test','stop','openProblems','openConsole'];
+const actions=['run','chooseRun','runFile','build','test','stop','openProblems','openConsole','openError'];
 
 function activate(context) {
   const root = path.join(os.homedir(), 'Library', 'Application Support', 'ForeverYoungPet', 'Bridge');
@@ -14,25 +14,30 @@ function activate(context) {
   const active = new Map();
   let sequence = 0, current = {state:'idle',runID:'',title:'VS Code',project:vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || ''};
   const processed = new Set();
-  let metadata={pluginVersion:'3.7.1'};
+  let metadata={pluginVersion:'3.8.0',bridgeAPI:'2'};
   const write = (folder, name, object) => {
     const target = path.join(root,folder,name+'.json'), temp = target+'.tmp';
     fs.writeFileSync(temp,JSON.stringify(object),{mode:0o600}); fs.renameSync(temp,target);
   };
   const publish = () => {
-    try { write('events',instance,{version:1,source:'vscode',instance,sequence:++sequence,sentAt:Date.now(),...current,activeCount:active.size,actions,metadata}); }
+    try { write('events',instance,{version:1,source:'vscode',instance,sequence:++sequence,sentAt:Date.now(),...current,activeCount:active.size+Number(metadata.ownedCount || 0),actions,metadata}); }
     catch (error) { console.warn('Forever Young local mailbox unavailable:',error.code); }
   };
-  const event = (state,runID,title,project) => {current={state,runID,title:String(title).slice(0,500),project:project || ''};publish();};
+  const event = (state,runID,title,project) => {phase={phase:state==='working'?'running':state,errorSummary:'',errorToken:'',errorFile:'',errorLine:'',errorColumn:''};metadata={...metadata,...phase};current={state,runID,title:String(title).slice(0,500),project:project || ''};publish();};
+  let phase={},focusedAt=vscode.window.state?.focused?Date.now():0;
+  const run=createRunner(vscode,context,update=>{
+    phase={...phase,...update.metadata};metadata={...metadata,...phase};
+    current={...current,state:update.state,runID:update.runID,title:update.title};publish();
+  });
   const taskIDs = new WeakMap();
   function startTask(execution) {
-    if (taskIDs.has(execution)) return;
+    if (run.isOwned(execution) || taskIDs.has(execution)) return;
     const id=crypto.randomUUID(); taskIDs.set(execution,id); active.set(id,execution);
     event('working',id,execution.task.name,execution.task.scope?.uri?.fsPath || current.project);
   }
   const finishedTasks = new WeakSet();
   function endTask(execution, code) {
-    if (finishedTasks.has(execution)) return;
+    if (run.isOwned(execution) || finishedTasks.has(execution)) return;
     finishedTasks.add(execution);
     const id=taskIDs.get(execution) || crypto.randomUUID();active.delete(id);
     // Undefined exit codes mean stopped/unconfirmed, never a successful test.
@@ -47,19 +52,22 @@ function activate(context) {
   // Debug termination lacks an exit code in this public API; label stopped, not success.
   for (const execution of vscode.tasks.taskExecutions) startTask(execution);
   if(vscode.debug.activeDebugSession) {const s=vscode.debug.activeDebugSession;active.set(s.id,s);event('working',s.id,s.name,s.workspaceFolder?.uri.fsPath || current.project);}
-  const run=createRunner(vscode,context);
-  async function refresh() {try {metadata=await run.describe();publish();}catch(error){metadata={pluginVersion:'3.7.1',diagnosticError:String(error.message).slice(0,400)};publish();}}
-  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(refresh),vscode.workspace.onDidChangeConfiguration(refresh));
+  async function refresh() {try {metadata={...await run.describe(),...phase,focused:String(vscode.window.state?.focused===true),focusedAt:String(focusedAt)};const file=vscode.window.activeTextEditor?.document?.uri;if(file)current.project=vscode.workspace.getWorkspaceFolder(file)?.uri.fsPath || current.project;publish();}catch(error){metadata={pluginVersion:'3.8.0',bridgeAPI:'2',diagnosticError:String(error.message).slice(0,400)};publish();}}
+  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(refresh),vscode.workspace.onDidChangeConfiguration(refresh),vscode.window.onDidChangeWindowState(state=>{if(state.focused)focusedAt=Date.now();refresh();}));
   async function command(action,expectedToken) {
     if(action==='openProblems')return vscode.commands.executeCommand('workbench.actions.view.problems');
+    if(action==='openError')return run(action,expectedToken);
     if(action==='openConsole')return vscode.commands.executeCommand('workbench.action.terminal.focus');
     if (!vscode.workspace.isTrusted) throw new Error('Workspace must be trusted before running configurations.');
     if (action === 'stop') {
+      if(run.stopOwned())return;
       if (active.size === 0) return;
+      if(active.size===1){const execution=[...active.values()][0];execution.task?execution.terminate():await vscode.debug.stopDebugging(execution);return;}
       const chosen = await vscode.window.showQuickPick([...active.entries()].map(([id,execution])=>({label:execution.task?.name || execution.name,description:'Stop this running task',id,execution})),{placeHolder:'Forever Young · Choose a task to stop'});
       if (chosen) chosen.execution.task ? chosen.execution.terminate() : await vscode.debug.stopDebugging(chosen.execution);
       return;
     }
+    if(['run','build','test'].includes(action) && active.size)throw new Error('A project task is already running in this window. Stop it or wait before starting another.');
     try {await run(action,expectedToken);await refresh();}catch(error){await vscode.window.showErrorMessage('Forever Young: '+error.message);throw error;}
   }
   for(const action of actions) context.subscriptions.push(vscode.commands.registerCommand('foreverYoung.'+action,()=>command(action).catch(()=>{})));

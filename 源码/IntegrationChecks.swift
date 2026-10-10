@@ -26,7 +26,7 @@ func runCodexAnimationChecks() throws -> [String] {
     pet.handle(.codexState(.completed), at: 5_000)
     try require(pet.frame(at: 6_000).mode == "looking", "completion returns to gaze after one wave")
 
-    let id = "00000000-0000-4000-8000-000000000001"
+    let id = "01a0fae6-ac9f-7820-ad67-8d7a422d5752"
     func snapshot(_ status: String, _ activity: CodexActivity, _ turn: String = "turn") -> CodexSnapshot {
         let thread = CodexThreadSummary(id: id, title: "测试任务", cwd: "/tmp", rollout: URL(fileURLWithPath: "/tmp/test.jsonl"),
             turnID: turn, turnStatus: status, startedAt: 0)

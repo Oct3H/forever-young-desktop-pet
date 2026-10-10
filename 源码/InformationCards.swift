@@ -174,7 +174,7 @@ final class InformationCard: NSObject, WKScriptMessageHandler, WKNavigationDeleg
         guard message.frameInfo.isMainFrame, message.name == "pet",
               let object = message.body as? [String: Any], let command = object["command"] as? String else { return }
         switch command {
-        case "toolSetting", "timer", "historyJump", "clearHistory", "audition", "exportCalendar", "diagnose": onTools?(object)
+        case "toolSetting", "timer", "historyJump", "clearHistory", "audition", "exportCalendar", "diagnose", "pinProject", "versionAction": onTools?(object)
         case "ready": loaded = true; publish()
         case "preferences":
             if let style = object["style"] as? String, ["anime", "minimal"].contains(style) { defaults.set(style, forKey: "uiStyle") }
@@ -188,7 +188,7 @@ final class InformationCard: NSObject, WKScriptMessageHandler, WKNavigationDeleg
         case "primary": if let value = object["value"] as? String, ["auto","codex","vscode","pycharm"].contains(value) { onPrimary?(value) }
         case "linkedAction":
             if let action = object["action"] as? String, let value = object["source"] as? String, let source = LinkedSource(rawValue:value),
-               (source == .codex ? ["run","test","review","stop"] : ["run","chooseRun","runFile","build","test","stop","openProblems","openConsole"]).contains(action) {
+               (source == .codex ? ["run","test","review","stop"] : ["run","chooseRun","runFile","build","test","stop","openProblems","openConsole","openError"]).contains(action) {
                 onLinkedAction?(action,source,object["instance"] as? String,object["expectedToken"] as? String)
             }
         case "officialConnect": onOfficialConnect?()

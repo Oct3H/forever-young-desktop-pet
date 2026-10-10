@@ -125,6 +125,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let codexConnection = LocalCodexConnection()
     private var codexSnapshot: CodexSnapshot?
     private let integrations = IntegrationHub()
+    private let versions = VersionManager()
     private let ideBridge = IDEBridge()
     private let officialCodex = OfficialCodex()
     private let localCodexInstance = UUID().uuidString
@@ -209,7 +210,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         panel = PetPanel(contentRect: NSRect(origin: origin, size: size),
                          styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-        panel.title = "フォーエバーヤング · Desktop v3.7.2"
+        panel.title = "フォーエバーヤング · Desktop v3.8.0"
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = false
@@ -261,7 +262,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func createMenus() {
         let menu = NSMenu()
-        let title = NSMenuItem(title: "フォーエバーヤング · 桌面版 v3.7.2", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: "フォーエバーヤング · 桌面版 v3.8.0", action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
         menu.addItem(.separator())
@@ -312,7 +313,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         petView.menu = menu
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.title = "🐎"
-        statusItem.button?.toolTip = "フォーエバーヤング v3.7.2 · Codex · IDE · GⅠ"
+        statusItem.button?.toolTip = "フォーエバーヤング v3.8.0 · Codex · IDE · GⅠ"
         statusItem.menu = menu
     }
 
@@ -480,7 +481,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         localCodexSequence += 1
         var event = LinkedEvent(version:1,source:.codex,instance:localCodexInstance,sequence:localCodexSequence,sentAt:Date().timeIntervalSince1970*1000,state:merged.activity,
                                 runID:(merged.selected?.id ?? "") + (officialCodex.activeTurns[merged.selected?.id ?? ""] ?? merged.selected?.turnID ?? ""),title:merged.selected?.title ?? "Codex",project:merged.selected?.cwd ?? "",activeCount:[CodexActivity.working,.waiting,.review].contains(merged.activity) ? 1 : 0)
-        event.metadata = ["threadID":merged.selected?.id ?? "","pluginVersion":"built-in 3.7.2","runtime":officialCodex.object["transport"] as? String ?? ""]
+        event.metadata = ["threadID":merged.selected?.id ?? "","pluginVersion":"built-in 3.8.0","runtime":officialCodex.object["transport"] as? String ?? ""]
         integrations.receive(event,notify:previousID == merged.selected?.id || !merged.activity.isTransient)
         _ = codexAnimationLink.update(merged, enabled:codexEnabled)
         if externalStateUntil == 0 { applyCodexState(codexEnabled ? integrations.selected?.animation ?? .idle : .idle) }
@@ -539,6 +540,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func startIntegrations() {
         integrations.primary = defaults.string(forKey:"primaryIntegration") ?? "auto"
+        integrations.pinnedProjects = defaults.dictionary(forKey:"pinnedProjects") as? [String:String] ?? [:]
+        versions.onChange = { [weak self] in self?.refreshTools() }
+        bubbles?.onError = { [weak self] event in self?.runLinkedAction("openError",source:event.source,instance:event.instance,expectedToken:event.metadata?["errorToken"]) }
+        ideBridge.onAck = { [weak self] _,ok,message in if !ok { self?.bubbles?.showMessage(message) } }
         integrations.onTransition = { [weak self] event in self?.tools.receive(event) }
         integrations.onChange = { [weak self] in self?.integrationsChanged() }
         ideBridge.onEvent = { [weak self] event in self?.integrations.receive(event) }
@@ -559,11 +564,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     private func runDefaultShortcut() {
         ideBridge.poll(); integrations.expire()
-        guard (integrations.frontmost ?? integrations.selectedSource) == .vscode,
-              let target = integrations.latest(.vscode), target.supportedActions.contains("runFile"),
+        guard let source = integrations.frontmost ?? integrations.selectedSource, [.vscode,.pycharm].contains(source),
+              let target = integrations.latest(source), target.supportedActions.contains("runFile"),
               let file = target.metadata?["file"], !file.isEmpty,
               let token = target.metadata?["fileToken"], !token.isEmpty else { showIntegrations(); return }
-        runLinkedAction("runFile", source:.vscode, instance:target.instance, expectedToken:token)
+        runLinkedAction("runFile", source:source, instance:target.instance, expectedToken:token)
     }
     @objc private func showIntegrations() {
         let card = workspace(); workspacePage = .integrations; card.selectPage(.integrations)
@@ -595,12 +600,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let target = target else { showIntegrations(); return }
             do {
                 if ["run","runFile","build","test"].contains(action) && expectedToken == nil { showIntegrations(); return }
+                if ["run","runFile","build","test"].contains(action) {
+                    guard target.metadata?["bridgeAPI"] == "2", target.metadata?["pluginVersion"] == "3.8.0" else { bubbles?.showMessage("请在设置中安装配套的 3.8.0 IDE 插件 / Install the paired 3.8.0 IDE bridge."); return }
+                    guard (Int(target.metadata?["ownedCount"] ?? "") ?? 0) == 0 else { bubbles?.showMessage("当前文件仍在运行，可等待结束或点击停止 / Current file is still running."); return }
+                }
                 try ideBridge.command(action,target:target,expectedToken:expectedToken)
                 let language = defaults.string(forKey:"uiLanguage") ?? "zh"
                 let hint = action == "runFile"
-                    ? ["zh":"已请求运行当前文件，请在 VS Code 终端输入数据。","ja":"現在のファイルを要求しました。入力は VS Code のターミナルで。","en":"Current-file run requested. Enter input in the VS Code terminal."]
+                    ? ["zh":"已请求运行当前文件，请在 IDE 终端／Run 控制台输入数据。","ja":"現在のファイルを要求しました。入力は IDE のターミナル／Run コンソールで。","en":"Current-file run requested. Enter input in the IDE terminal / Run console."]
                     : action == "stop"
-                    ? ["zh":"请在 IDE 确认要停止的任务。","ja":"IDE で停止するタスクを確認してください。","en":"Confirm the task to stop in the IDE."]
+                    ? ["zh":"已请求停止桌宠启动的任务；多任务时在 IDE 选择。","ja":"IDE で停止するタスクを確認してください。","en":"Stop requested. Choose in the IDE only when multiple targets remain."]
                     : ["zh":"已请求操作；首次选定目标后可重复运行。","ja":"操作を要求しました。選択した対象は再利用します。","en":"Action requested. Selected targets are remembered."]
                 bubbles?.showMessage("\(target.source.label) · \(hint[language] ?? hint["zh"]!)")
                 NSWorkspace.shared.runningApplications.first { app in
@@ -713,7 +722,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     private func refreshTools() {
         var object = tools.object; object["races"] = reminders.object
-        object["diagnostics"] = integrations.object; object["official"] = officialCodex.object
+        object["versions"] = versions.object; object["diagnostics"] = integrations.object; object["official"] = officialCodex.object
         object["codexRecordConnected"] = codexSnapshot?.connected ?? false
         codexCard?.renderCompanion(object)
     }
@@ -732,6 +741,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                   let cue = voices?.select(context,hour:Calendar.current.component(.hour,from:Date())) else { return }
             // Audition is an explicit user action; it bypasses quiet hours, but respects volume.
             _ = playVoice(cue,context:context,key:nil,at:nowMilliseconds(),wave:false)
+        case "pinProject":
+            if let source = object["source"] as? String, ["vscode","pycharm"].contains(source) {
+                let project = object["project"] as? String ?? ""
+                if project.isEmpty { integrations.pinnedProjects.removeValue(forKey:source) }
+                else if integrations.events.values.contains(where:{$0.source.rawValue == source && $0.project == project}) { integrations.pinnedProjects[source] = project }
+                defaults.set(integrations.pinnedProjects,forKey:"pinnedProjects"); integrationsChanged(); refreshTools()
+            }
+        case "versionAction":
+            switch object["action"] as? String {
+            case "check": versions.check()
+            case "import": versions.chooseImport()
+            case "download": NSWorkspace.shared.open(VersionManager.repository)
+            case "plugins": versions.plugins(version:object["id"] as? String ?? "")
+            case "switch": versions.activate(version:object["id"] as? String ?? "",hasActiveTasks:integrations.events.values.contains { $0.activeCount > 0 || (Int($0.metadata?["ownedCount"] ?? "") ?? 0) > 0 } || !officialCodex.activeTurns.isEmpty) { [weak self] result in
+                switch result { case .success: NSApp.terminate(nil); case let .failure(error): self?.bubbles?.showMessage(error.localizedDescription) }
+            }
+            default: break
+            }
         case "diagnose": codexConnection.refresh(); ideBridge.poll(); officialCodex.connect { [weak self] _ in self?.refreshTools() }; refreshTools()
         case "historyJump":
             guard let id = object["id"] as? String, let record = tools.history.first(where:{$0.id == id}) else { return }
@@ -880,7 +907,7 @@ extension AppDelegate {
         createMenus()
         panel.orderFrontRegardless()
         defer { panel.close(); codexCard?.panel.close(); raceCard?.panel.close(); raceTask?.cancel() }
-        let id = "00000000-0000-4000-8000-000000000001"
+        let id = "01a0fae6-ac9f-7820-ad67-8d7a422d5752"
         let thread = CodexThreadSummary(id: id, title: "制作フォーエバーヤング桌宠（测试卡片）", cwd: "/本地项目/青春永驻",
             rollout: directory.appendingPathComponent("fixture.jsonl"), turnID: "test", turnStatus: "inProgress", startedAt: 0)
         receiveCodex(CodexSnapshot(connected: true, threads: [thread], selected: thread, activity: .working,
@@ -1139,6 +1166,10 @@ if CommandLine.arguments.contains("--racing-check") {
         } catch { fputs("Racing check failed: \(error)\n", stderr); exit(1) }
     }
     dispatchMain()
+}
+if let index = CommandLine.arguments.firstIndex(of:"--version-test") {
+    do { _ = NSApplication.shared; try printJSON(["ok":true,"checks":try runVersionChecks(directory:URL(fileURLWithPath:CommandLine.arguments[index+1]))]);exit(0) }
+    catch { fputs("Version checks failed: \(error)\n",stderr);exit(1) }
 }
 if let index = CommandLine.arguments.firstIndex(of:"--linked-test") {
     do {

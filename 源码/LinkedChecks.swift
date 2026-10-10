@@ -11,6 +11,15 @@ func runLinkedChecks(directory: URL) throws -> [String] {
     try require(hub.events.count == 3,"all three sources remain received concurrently")
     hub.primary = "pycharm"; try require(hub.selectedSource == .pycharm,"manual primary selection")
     hub.primary = "auto"; hub.frontmost = .vscode; try require(hub.selectedSource == .vscode,"frontmost source automatic primary")
+    let windows = IntegrationHub()
+    var older = event(.vscode,.working,1,1); older.metadata = ["focusedAt":"100"]
+    var focused = older; focused = LinkedEvent(version:1,source:.vscode,instance:UUID().uuidString,sequence:1,sentAt:older.sentAt-100,state:.idle,runID:"",title:"Focused window",project:"/tmp/second",activeCount:0,metadata:["focusedAt":"200"])
+    windows.receive(older); windows.receive(focused)
+    try require(windows.latest(.vscode)?.instance == focused.instance,"focused window wins over an active background task and newer heartbeat")
+    windows.pinnedProjects["vscode"] = older.project
+    try require(windows.latest(.vscode)?.instance == older.instance,"pinned workspace overrides focus")
+    windows.pinnedProjects["vscode"] = "/tmp/closed-project"
+    try require(windows.latest(.vscode) == nil,"closed pinned workspace never falls through to a different project")
     hub.receive(event(.vscode,.failed,2)); hub.receive(event(.pycharm,.completed,2)); hub.receive(event(.codex,.waiting,3,1))
     try require(hub.takeNotice()?.event.state == .failed && hub.takeNotice()?.event.state == .completed,"failure and completion precede ordinary events")
     let count=hub.queue.count; hub.receive(event(.codex,.waiting,3,1)); hub.receive(event(.codex,.waiting,4,1))
@@ -24,11 +33,15 @@ func runLinkedChecks(directory: URL) throws -> [String] {
     let commands=try FileManager.default.contentsOfDirectory(at:bridge.root.appendingPathComponent("commands"),includingPropertiesForKeys:nil)
     let command=try JSONSerialization.jsonObject(with:Data(contentsOf:commands[0])) as! [String:Any]
     try require(command["action"] as? String == "run" && command["instance"] as? String == input.instance && command["command"] == nil,"fixed-action targeted mailbox contains no arbitrary shell")
+    var ackOK = false; bridge.onAck = { _,ok,_ in ackOK = ok }
+    let id = command["id"] as! String
+    try JSONSerialization.data(withJSONObject:["version":1,"id":id,"ok":true]).write(to:bridge.root.appendingPathComponent("acks/\(id).json"))
+    bridge.poll(now:now); try require(ackOK,"IDE acknowledgement is matched to the pending command")
     let malformed=Data("{\"source\":\"unknown\"}".utf8); try require(LinkedEvent.parse(malformed) == nil,"invalid source rejected")
     hub.expire(now:now.addingTimeInterval(41)); try require(hub.events.count == 1,"stale IDE heartbeats expire while Codex remains received")
     let rpc=OfficialCodex(); var methods:[String]=[],params:[[String:Any]]=[]
     rpc.requestHook={ method,value,done in methods.append(method);params.append(value);done(.success(method == "turn/start" ? ["turn":["id":"turn-1"]] : [:])) }
-    let thread=CodexThreadSummary(id:"00000000-0000-4000-8000-000000000001",title:"fixture",cwd:directory.path,rollout:directory.appendingPathComponent("fixture.jsonl"),turnID:"turn-elsewhere",turnStatus:"idle",startedAt:0)
+    let thread=CodexThreadSummary(id:"01a0fae6-ac9f-7820-ad67-8d7a422d5752",title:"fixture",cwd:directory.path,rollout:directory.appendingPathComponent("fixture.jsonl"),turnID:"turn-elsewhere",turnStatus:"idle",startedAt:0)
     var result: Result<Void,Error>?
     rpc.send("literal `text` $(data)",to:thread,activeElsewhere:false){result=$0}
     if case .success? = result {} else { throw IntegrationCheckError.failed("direct send") }
@@ -47,12 +60,12 @@ func runLinkedChecks(directory: URL) throws -> [String] {
     rpc.notification("turn/started",params:["threadId":thread.id,"turn":["id":"turn-2"]])
     rpc.stop()
     try require(states == [.working,.disconnected] && rpc.activeTurns.isEmpty,"official disconnect clears active state and reports unconfirmed connection")
-    return ["concurrent three-source reception","manual and frontmost primary selection","severity and primary reminder queue","heartbeat deduplication and expiry","atomic targeted IDE command mailbox","official direct send preserves thread and policies","official steering on own active turn","no takeover of another active client","official event mapping","official disconnection clears active state"]
+    return ["concurrent three-source reception","manual and frontmost primary selection","window focus overrides background activity","pinned workspace target","closed pinned workspace refuses other projects","matched IDE acknowledgement","severity and primary reminder queue","heartbeat deduplication and expiry","atomic targeted IDE command mailbox","official direct send preserves thread and policies","official steering on own active turn","no takeover of another active client","official event mapping","official disconnection clears active state"]
 }
 
 extension InformationCard {
     func checkLinkedUI(defaults: UserDefaults,directory: URL) throws -> [String] {
-        let sources=LinkedSource.allCases.map { ["source":$0.rawValue,"label":$0.label,"state":"working","title":"Fixture <task>","project":"/tmp/fixture","instance":"22222222-2222-4222-8222-222222222222","activeCount":1,"connected":true,"metadata":["pluginVersion":"3.7.0","runToken":"select","fileToken":"fixture","file":"/tmp/exercise.cpp","runtime":"/usr/bin/clang++","runTarget":"Build Workspace"],"actions":$0 == .vscode ? ["run","chooseRun","runFile","build","test","stop"] : ["run","chooseRun","test","stop"]] as [String:Any] }
+        let sources=LinkedSource.allCases.map { ["source":$0.rawValue,"label":$0.label,"state":"working","title":"Fixture <task>","project":"/tmp/fixture","instance":"22222222-2222-4222-8222-222222222222","activeCount":1,"connected":true,"metadata":["pluginVersion":"3.8.0","bridgeAPI":"2","runToken":"select","fileToken":"fixture","file":$0 == .pycharm ? "/tmp/exercise.py":"/tmp/exercise.cpp","runtime":"/usr/bin/clang++","runTarget":"Build Workspace"],"actions":$0 == .vscode ? ["run","chooseRun","runFile","build","test","stop"] : ["run","chooseRun","runFile","test","stop"]] as [String:Any] }
         var primary="auto",action="",actionSource:LinkedSource?,actionInstance:String?,preset="",officialChecks=0
         onPrimary={ value in
             primary=value
@@ -68,6 +81,8 @@ extension InformationCard {
         renderIntegrations(["primary":"auto","selected":"codex","sources":sources],official:["ready":true,"transport":"stdio"])
         try awaitUI("document.querySelector('[data-ui-surface]:not([hidden]) [data-linked-controls]').dataset.linkedControls==='vscode'")
         try clickForCheck("[data-linked-source=pycharm]")
+        try clickForCheck("[data-command=linkedAction][data-action=runFile]")
+        try require(action == "runFile" && actionSource == .pycharm,"PyCharm primary action runs the current file")
         try clickForCheck("[data-command=linkedAction][data-action=chooseRun]")
         try require(actionSource == .pycharm && action == "chooseRun","PyCharm control targets PyCharm while primary is Codex")
         try clickForCheck("[data-linked-source=codex]")

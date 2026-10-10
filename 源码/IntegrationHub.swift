@@ -28,8 +28,8 @@ struct LinkedEvent: Codable {
               UUID(uuidString: event.instance) != nil, event.sequence >= 0, event.activeCount >= 0, event.activeCount < 1000,
               abs(now.timeIntervalSince1970 * 1000 - event.sentAt) < 40_000,
               event.title.utf8.count <= 2048, event.project.utf8.count <= 4096, event.runID.utf8.count <= 256,
-              event.actions.map({$0.count <= 8 && $0.allSatisfy { ["run","chooseRun","runFile","build","test","stop","openProblems","openConsole"].contains($0) }}) ?? true else { return nil }
-        guard event.metadata.map({$0.count <= 20 && $0.allSatisfy { $0.key.utf8.count <= 64 && $0.value.utf8.count <= 4096 }}) ?? true else { return nil }
+              event.actions.map({$0.count <= 12 && $0.allSatisfy { ["run","chooseRun","runFile","build","test","stop","openProblems","openConsole","openError"].contains($0) }}) ?? true else { return nil }
+        guard event.metadata.map({$0.count <= 40 && $0.allSatisfy { $0.key.utf8.count <= 64 && $0.value.utf8.count <= 4096 }}) ?? true else { return nil }
         return event
     }
 }
@@ -46,6 +46,7 @@ final class IntegrationHub {
     private(set) var queue: [PetNotice] = []
     var primary = "auto"
     var frontmost: LinkedSource?
+    var pinnedProjects: [String:String] = [:]
     private var seen: [String: Int] = [:]
     private var transitions: [String: String] = [:]
     private var changedAt: [String:Double] = [:]
@@ -60,7 +61,10 @@ final class IntegrationHub {
             (latest(.codex).map { $0.state != .disconnected } == true ? .codex : events.values.filter { $0.state != .disconnected }.max { $0.sentAt < $1.sentAt }?.source)
     }
     func latest(_ source: LinkedSource) -> LinkedEvent? {
-        let all = events.values.filter { $0.source == source }
+        let all = events.values.filter { $0.source == source && $0.state != .disconnected }
+        if let project = pinnedProjects[source.rawValue] { return all.filter { $0.project == project }.max { $0.sentAt < $1.sentAt } }
+        let focused = all.filter { (Double($0.metadata?["focusedAt"] ?? "") ?? 0) > 0 }
+        if let window = focused.max(by: { (Double($0.metadata?["focusedAt"] ?? "") ?? 0) < (Double($1.metadata?["focusedAt"] ?? "") ?? 0) }) { return window }
         return all.filter { $0.activeCount > 0 }.max { (changedAt[$0.key] ?? 0) < (changedAt[$1.key] ?? 0) } ?? all.max { $0.sentAt < $1.sentAt }
     }
     var selected: LinkedEvent? { selectedSource.flatMap { latest($0) } }
@@ -100,7 +104,7 @@ final class IntegrationHub {
         for (key, _) in stale { events.removeValue(forKey:key); transitions.removeValue(forKey:key); changedAt.removeValue(forKey:key) }
         revision += 1; onChange?()
     }
-    var object: [String: Any] { ["primary":primary,"selected":selectedSource?.rawValue ?? "codex","sources":LinkedSource.allCases.map { source -> [String: Any] in
+    var object: [String: Any] { ["primary":primary,"selected":selectedSource?.rawValue ?? "codex","pinnedProjects":pinnedProjects,"instances":events.values.filter {$0.state != .disconnected}.map {$0.object},"sources":LinkedSource.allCases.map { source -> [String: Any] in
         var value = latest(source)?.object ?? ["source":source.rawValue,"label":source.label,"state":"disconnected","title":"","activeCount":0]
         value["connected"] = latest(source).map { $0.state != .disconnected } ?? false; return value
     }] }
@@ -113,6 +117,8 @@ final class IDEBridge {
     var onEvent: ((LinkedEvent) -> Void)?
     private var timer: Timer?
     private var sequences: [String: Int] = [:]
+    private var pending: [String:Date] = [:]
+    var onAck: ((String,Bool,String) -> Void)?
     init(root: URL = IDEBridge.defaultRoot) { self.root = root }
     func start() throws {
         for name in ["events","commands","acks"] {
@@ -122,6 +128,13 @@ final class IDEBridge {
         poll()
     }
     func poll(now: Date = Date()) {
+        for (id,date) in pending {
+            let url = root.appendingPathComponent("acks/\(id).json")
+            if let values = try? url.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey,.fileSizeKey]), values.isRegularFile == true, values.isSymbolicLink != true, (values.fileSize ?? 0) <= 4096,
+               let data = try? Data(contentsOf:url), let value = try? JSONSerialization.jsonObject(with:data) as? [String:Any], value["id"] as? String == id, value["version"] as? Int == 1, let ok = value["ok"] as? Bool {
+                pending.removeValue(forKey:id); try? FileManager.default.removeItem(at:url); onAck?(id,ok,String((value["error"] as? String ?? "").prefix(400)))
+            } else if now.timeIntervalSince(date) > 16 { pending.removeValue(forKey:id); onAck?(id,false,"IDE did not acknowledge the request. Reload the bridge plugin and retry.") }
+        }
         guard let files = try? FileManager.default.contentsOfDirectory(at:root.appendingPathComponent("events"), includingPropertiesForKeys:[.isRegularFileKey,.isSymbolicLinkKey,.fileSizeKey]) else { return }
         for url in files.prefix(100) where url.pathExtension == "json" {
             guard let values = try? url.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey,.fileSizeKey]), values.isRegularFile == true,
@@ -131,7 +144,7 @@ final class IDEBridge {
             sequences[event.key] = event.sequence; onEvent?(event)
         }
     }
-    func command(_ action: String, target: LinkedEvent, expectedToken: String? = nil) throws {
+    @discardableResult func command(_ action: String, target: LinkedEvent, expectedToken: String? = nil) throws -> String {
         guard target.supportedActions.contains(action), target.source != .codex,
               Date().timeIntervalSince1970 * 1000 - target.sentAt < 35_000 else { throw CocoaError(.validationMissingMandatoryProperty) }
         let id = UUID().uuidString
@@ -140,6 +153,7 @@ final class IDEBridge {
         let url = root.appendingPathComponent("commands/\(target.instance)-\(id).json")
         try JSONSerialization.data(withJSONObject:object).write(to:url,options:.atomic)
         try FileManager.default.setAttributes([.posixPermissions:0o600],ofItemAtPath:url.path)
+        pending[id] = Date(); return id
     }
     func stop() { timer?.invalidate(); timer = nil }
 }

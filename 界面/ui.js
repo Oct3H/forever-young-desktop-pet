@@ -213,33 +213,35 @@
   Object.assign(translations.zh,{runCpp:'编译并运行当前文件',advancedRun:'高级工程操作（可选）',practiceHint:'默认运行当前文件，无需选择工程目标。运行前自动保存，输入数据请使用 VS Code 终端。',pluginUpgrade:'请更新 VS Code 3.7.1／PyCharm 3.7.0 联动插件。'});
   Object.assign(translations.ja,{runCpp:'現在のファイルをビルドして実行',advancedRun:'高度なプロジェクト操作（任意）',practiceHint:'既定は現在のファイルを実行。対象選択は不要です。保存後、入力は VS Code のターミナルで行います。',pluginUpgrade:'VS Code 3.7.1／PyCharm 3.7.0 の連携プラグインを更新してください。'});
   Object.assign(translations.en,{runCpp:'Compile and run current file',advancedRun:'Advanced project actions (optional)',practiceHint:'Run the current file by default, without choosing a project target. The file is saved first; enter input in the VS Code terminal.',pluginUpgrade:'Update the VS Code 3.7.1 / PyCharm 3.7.0 bridge plugins.'});
+  const linkedWords={
+    zh:{window:'运行窗口 / 项目',follow:'跟随最后操作的窗口',pin:'固定到此项目',unpin:'恢复跟随窗口',preparing:'准备运行',compiling:'编译中',running:'程序运行中',completed:'运行结束',failed:'运行失败',interrupted:'已停止',error:'最新错误',locate:'定位错误',advanced:'高级工程操作（可选）',hint:'默认保存并运行当前文件；输入请使用 IDE 终端／Run 控制台。',upgrade:'此功能需要配套的 3.8.0 联动插件。安装后重载／重启 IDE。'},
+    ja:{window:'実行ウィンドウ / プロジェクト',follow:'最後に操作したウィンドウを追跡',pin:'このプロジェクトに固定',unpin:'ウィンドウの追跡に戻る',preparing:'実行準備',compiling:'コンパイル中',running:'プログラム実行中',completed:'実行完了',failed:'実行失敗',interrupted:'停止済み',error:'最新のエラー',locate:'エラーへ移動',advanced:'高度なプロジェクト操作（任意）',hint:'保存後、現在のファイルを実行します。入力は IDE のターミナル／Run コンソールで。',upgrade:'対応する 3.8.0 プラグインを導入し、IDE を再読み込み／再起動してください。'},
+    en:{window:'Run window / project',follow:'Follow the last focused window',pin:'Pin this project',unpin:'Follow windows again',preparing:'Preparing',compiling:'Compiling',running:'Program running',completed:'Run ended',failed:'Run failed',interrupted:'Stopped',error:'Latest error',locate:'Go to error',advanced:'Advanced project actions (optional)',hint:'Save and run the current file. Enter input in the IDE terminal / Run console.',upgrade:'Install the paired 3.8.0 bridge, then reload/restart the IDE.'}
+  };
   function renderIntegrations() {
-    const integration=data.integrations || {primary:'auto',selected:'codex',sources:[]};
+    const integration=data.integrations || {primary:'auto',selected:'codex',sources:[]},w=linkedWords[state.language];
     const sourceName=value=>({codex:'Codex',vscode:'VS Code',pycharm:'PyCharm'}[value] || text('noneSelected'));
-    if(!state.operationSource && received) state.operationSource=integration.selected || 'codex';
+    if(!state.operationSource && received)state.operationSource=integration.selected || 'codex';
     const operation=state.operationSource || integration.selected || 'codex';
     let content=`<div class="fy-primary-display" data-primary-display><span>${escape(text('primaryIntegration'))}<strong>${escape(integration.primary==='auto'?text('autoIntegration'):sourceName(integration.primary))}</strong></span><span>${escape(text('currentIntegration'))}<strong>${escape(sourceName(integration.selected))}</strong></span><small>${escape(text('changeInSettings'))}</small></div>`;
-    content+=(integration.sources || []).map(source=>`<article class="fy-source-card fy-${escape(source.source)} ${operation===source.source?'fy-operation-selected':''}"><button type="button" class="fy-source-select" data-linked-source="${escape(source.source)}" aria-pressed="${operation===source.source}"><span class="fy-thread-heading"><strong>${escape(source.label)}</strong><span>${escape(source.connected?activity(source.state):text('notConnected'))}</span></span><strong class="fy-source-title">${escape(source.title || '—')}</strong><span class="fy-location">${escape(source.project || '')}</span><small>${Number(source.activeCount)||0} ${escape(text('liveRuns'))}${integration.selected===source.source?' · '+escape(text('primaryBadge')):''}</small></button></article>`).join('');
-    const source=(integration.sources || []).find(source=>source.source===operation);
-    const actions=source?.actions || ['run','build','test','stop'];
-    const linkedButton=(key,action,primary=false)=>button(key,'linkedAction',`data-action="${action}" data-source="${operation}" ${source?.metadata?.[action==='runFile'?'fileToken':action+'Token']?`data-expected-token="${escape(source.metadata[action==='runFile'?'fileToken':action+'Token'])}"`:''} ${source?.instance?`data-instance="${escape(source.instance)}"`:''} ${source?.connected && actions.includes(action) && (!['run','runFile','build','test'].includes(action) || ['3.7.0','3.7.1'].includes(source?.metadata?.pluginVersion))?'':'disabled'}`,primary);
-    let controls,advanced="";
-    if(operation==='codex') controls=button('sendCodex','codexCompose','',true)+button('runCodex','codexCompose','data-preset="run"')+button('testCodex','codexCompose','data-preset="test"')+button('reviewCodex','codexCompose','data-preset="review"')+button('stopLinked','linkedAction','data-action="stop" data-source="codex"');
-    else if(operation==='vscode') {
-      controls=linkedButton(/\.(c|cc|cpp|cxx)$/i.test(source?.metadata?.file || '')?'runCpp':'runFile','runFile',true)+linkedButton('stopLinked','stop');
-      advanced=linkedButton('runLinked','run')+linkedButton('chooseRun','chooseRun')+linkedButton('buildLinked','build')+linkedButton('testLinked','test');
-    } else controls=linkedButton('runLinked','run',true)+linkedButton('chooseRun','chooseRun')+linkedButton('testLinked','test')+linkedButton('stopLinked','stop');
-    if(operation!=='codex') {
-      const m=source?.metadata || {};
-      const labels={zh:['将运行的目标','当前文件','当前文件解释器 / 编译器','首次需在 IDE 选择目标','打开问题面板','打开控制台'],ja:['実行予定の対象','現在のファイル','現在のファイルの実行環境','初回は IDE で対象を選択','問題パネル','コンソール'],en:['Target to run','Current file','Current-file interpreter / compiler','Choose in IDE on first use','Open Problems','Open console']}[state.language];
-      const projectPreview=`<strong>${escape(labels[0])}</strong><p>${escape(m.runTarget || labels[3])}</p><dl>${operation==='vscode'?`<dt>Build</dt><dd>${escape(m.buildTarget || labels[3])}</dd>`:''}<dt>Test</dt><dd>${escape(m.testTarget || labels[3])}</dd></dl>`;
-      content+=`<div class="fy-run-preview">${operation==='vscode'?`<strong>${escape(text('runFile'))}</strong><p>${escape(m.file || '—')}</p>`:projectPreview}<small>${escape(source?.project || '')}</small><dl><dt>${escape(labels[1])}</dt><dd>${escape(m.file || '—')}</dd><dt>${escape(labels[2])}</dt><dd>${escape(m.runtime || '—')}</dd></dl>${operation==='vscode'?`<p class="fy-race-label">${escape(text('practiceHint'))}</p>`:''}</div>`;
-      if(operation==='vscode') {
-        controls+=linkedButton(labels[5],'openConsole');
-        advanced=`<details class="fy-vscode-advanced" data-advanced-vscode ${state.vscodeAdvancedOpen?'open':''}><summary data-vscode-advanced-toggle>${escape(text('advancedRun'))}</summary><div class="fy-run-preview">${projectPreview}</div><div class="fy-actions">${advanced+linkedButton(labels[4],'openProblems')}</div></details>`;
-      } else controls+=linkedButton(labels[4],'openProblems')+linkedButton(labels[5],'openConsole');
+    content+=(integration.sources || []).map(s=>`<article class="fy-source-card fy-${escape(s.source)} ${operation===s.source?'fy-operation-selected':''}"><button type="button" class="fy-source-select" data-linked-source="${escape(s.source)}" aria-pressed="${operation===s.source}"><span class="fy-thread-heading"><strong>${escape(s.label)}</strong><span>${escape(s.connected?(w[s.metadata?.phase] || activity(s.state)):text('notConnected'))}</span></span><strong class="fy-source-title">${escape(s.title || '—')}</strong><span class="fy-location">${escape(s.project || '')}</span><small>${Number(s.activeCount)||0} ${escape(text('liveRuns'))}${integration.selected===s.source?' · '+escape(text('primaryBadge')):''}</small></button></article>`).join('');
+    const source=integration.sources.find(s=>s.source===operation),m=source?.metadata || {},actions=source?.actions || [],compatible=m.bridgeAPI==='2'&&m.pluginVersion==='3.8.0',busy=Number(m.ownedCount)>0;
+    const linkedButton=(key,action,primary=false)=>{
+      const token=m[action==='runFile'?'fileToken':action==='openError'?'errorToken':action+'Token'];
+      const needsRun=['run','runFile','build','test'].includes(action),enabled=source?.connected&&actions.includes(action)&&(!needsRun || compatible&&!busy)&&(!(action==='openError') || token);
+      return button(key,'linkedAction',`data-action="${action}" data-source="${operation}" ${token?`data-expected-token="${escape(token)}"`:''} ${source?.instance?`data-instance="${escape(source.instance)}"`:''} ${enabled?'':'disabled'}`,primary);
+    };
+    let controls='',advanced='';
+    if(operation==='codex')controls=button('sendCodex','codexCompose','',true)+button('runCodex','codexCompose','data-preset="run"')+button('testCodex','codexCompose','data-preset="test"')+button('reviewCodex','codexCompose','data-preset="review"')+button('stopLinked','linkedAction','data-action="stop" data-source="codex"');
+    else {
+      const windows=(integration.instances || []).filter(s=>s.source===operation);
+      content+=`<label class="fy-window-select">${escape(w.window)}<select data-window-project data-source="${operation}"><option value="">${escape(w.follow)}</option>${[...new Set([...windows.map(s=>s.project),...(integration.pinnedProjects?.[operation]?[integration.pinnedProjects[operation]]:[])])].map(project=>`<option value="${escape(project)}" ${integration.pinnedProjects?.[operation]===project?'selected':''}>${escape(project)}</option>`).join('')}</select></label>`;
+      content+=`<div class="fy-run-preview"><strong>${escape(text('runFile'))}</strong><p>${escape(m.file || '—')}</p><small>${escape(source?.project || '')}</small><dl><dt>${escape(state.language==='zh'?'解释器 / 编译器':state.language==='ja'?'実行環境':'Interpreter / compiler')}</dt><dd>${escape(m.runtime || '—')}</dd></dl><p class="fy-race-label">${escape(w.hint)}</p>${m.phase?`<p role="status">${escape(w[m.phase] || m.phase)}</p>`:''}</div>`;
+      if(m.errorSummary)content+=`<div class="fy-notice" role="status"><strong>${escape(w.error)}</strong><p>${escape(m.errorSummary)}</p>${m.errorFile?`<small>${escape(m.errorFile)}:${escape(m.errorLine || '')}</small>`:''}<div class="fy-actions">${linkedButton(w.locate,'openError')}</div></div>`;
+      controls=linkedButton(operation==='vscode'&&/\.(c|cc|cpp|cxx)$/i.test(m.file || '')?'runCpp':'runFile','runFile',true)+linkedButton('stopLinked','stop')+linkedButton(state.language==='zh'?'打开控制台':state.language==='ja'?'コンソール':'Open console','openConsole');
+      advanced=`<details class="fy-vscode-advanced" data-advanced-vscode ${state.vscodeAdvancedOpen?'open':''}><summary data-vscode-advanced-toggle>${escape(w.advanced)}</summary><div class="fy-run-preview"><strong>${escape(text('runLinked'))}</strong><p>${escape(m.runTarget || '—')}</p><small>Test: ${escape(m.testTarget || '—')}</small></div><div class="fy-actions">${linkedButton('runLinked','run')+linkedButton('chooseRun','chooseRun')+(operation==='vscode'?linkedButton('buildLinked','build'):'')+linkedButton('testLinked','test')+linkedButton(state.language==='zh'?'打开问题面板':state.language==='ja'?'問題パネル':'Open Problems','openProblems')}</div></details>`;
     }
-    content+=`<div class="fy-operation-controls" data-linked-controls="${operation}"><h4>${escape(text('operationTarget'))} · ${escape(sourceName(operation))}</h4><p class="fy-race-label">${escape(text('operationHint'))}</p><div class="fy-actions">${controls}</div>${advanced}${operation!=='codex' && source?.connected && !['3.7.0','3.7.1'].includes(source?.metadata?.pluginVersion)?`<p class="fy-notice">${escape(text('pluginUpgrade'))}</p>`:''}</div>`;
+    content+=`<div class="fy-operation-controls" data-linked-controls="${operation}"><h4>${escape(text('operationTarget'))} · ${escape(sourceName(operation))}</h4><p class="fy-race-label">${escape(text('operationHint'))}</p><div class="fy-actions">${controls}</div>${advanced}${operation!=='codex'&&source?.connected&&!compatible?`<p class="fy-notice">${escape(w.upgrade)}</p>`:''}</div>`;
     root.querySelector('[data-uma-panel=integrations]').innerHTML=`<div class="uma-ribbon"><h3>${icon('terminal')}<span>${escape(text('integrations'))}</span></h3></div><div class="uma-panel-body">${content}</div>`;
     root.querySelector('[data-panel=integrations]').innerHTML=`<h3>${escape(text('integrations'))}</h3>${content}`;
     root.querySelectorAll('.fy-settings [data-primary-integration]').forEach(select=>select.value=integration.primary);
@@ -363,6 +365,7 @@
     if (target.hasAttribute('data-open-settings') && state.settings) root.querySelector('[data-ui-surface]:not([hidden]) [data-ui-style]').focus();
   });
   root.addEventListener('change',event => {
+    if(event.target.hasAttribute('data-window-project')){send('pinProject',{source:event.target.dataset.source,project:event.target.value});return;}
     if (event.target.hasAttribute('data-primary-integration')) {send('primary',{value:event.target.value});return;}
     if (event.target.hasAttribute('data-toggle-codex')) {send('toggleCodex');return;}
     if (event.target.hasAttribute('data-ui-style')) state.style=event.target.value;

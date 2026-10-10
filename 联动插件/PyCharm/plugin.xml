@@ -1,9 +1,9 @@
 <idea-plugin>
   <id>org.foreveryoungpet.pycharm.bridge</id>
   <name>Forever Young Local Pet Bridge</name>
-  <version>3.7.0</version>
+  <version>3.8.0</version>
   <vendor>Forever Young Local</vendor>
-  <description>Local run/debug lifecycle and explicit saved-configuration controls for Forever Young desktop pet. No cloud server.</description>
+  <description>Local run/debug lifecycle and current-file execution and optional saved-configuration controls for Forever Young desktop pet. No cloud server.</description>
   <idea-version since-build="251"/>
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.python</depends>

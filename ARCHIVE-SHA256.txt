@@ -1,1 +1,1 @@
-51cb238cf6a70dbc47b0f5337dc3554f87ae58e6cb121c743ec277f991a3bc62  forever-young-desktop-macos-arm64.zip
+753b354d93e34d5cd6019ab1ceaa1d2595055c707745d7a1a9c1ad5ff953ddf3  forever-young-desktop-macos-arm64.zip

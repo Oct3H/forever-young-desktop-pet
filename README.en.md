@@ -1,4 +1,4 @@
-# フォーエバーヤング · macOS Desktop Pet v3.7.2
+# フォーエバーヤング · macOS Desktop Pet v3.8.0
 
 [中文](README.md)
 
@@ -35,7 +35,7 @@ The composer captures and revalidates its task. The installed official CLI App S
 
 ## Connect VS Code
 
-1. Extensions menu → **Install from VSIX…** → select the [3.7.1 installer](联动插件/forever-young-vscode-3.7.1.vsix), then reload the window.
+1. Extensions menu → **Install from VSIX…** → select the [3.8.0 installer](联动插件/forever-young-vscode-3.8.0.vsix), then reload the window.
 2. Open your project. Workspace Trust is enforced; Restricted Mode does not execute and the plugin does not change trust settings.
 3. The primary action runs the current local file, suitable for single-file C++ exercises without per-exercise tasks.json. The pet Run icon does the same while VS Code is frontmost.
 4. Dirty local files are saved first. Existing compilers build C17/C++17; only successful compilation starts the program in a focused interactive terminal. The source directory is the working directory. Failed builds never run a stale binary.
@@ -46,15 +46,20 @@ Controls include Run, change target, current file, Build, Test, Stop, Problems a
 
 ## Connect PyCharm
 
-1. IDE Plugins gear → **Install Plugin from Disk…** → select the [3.7.0 installer](联动插件/forever-young-pycharm-3.7.0.zip), then restart PyCharm.
-2. Open a project with an existing interpreter and saved Run/Debug Configuration.
-3. Integrations → PyCharm: verify the target before running. The selected/sole configuration is used first; ambiguous choices prompt once and are remembered per project.
-
-**PyCharm currently runs configurations, not necessarily the active `.py` file.** A remembered target takes priority, then the IDE’s selected/sole configuration. Missing or ambiguous configurations require creation/selection; changing editor tabs does not change the remembered target.
+1. IDE Plugins gear → **Install Plugin from Disk…** → select the [3.8.0 installer](联动插件/forever-young-pycharm-3.8.0.zip), then restart PyCharm.
+2. Open a project with an existing local Python interpreter and the `.py` file to run.
+3. Integrations → PyCharm → Run current file saves the file and creates a temporary Python configuration. Interactive input stays in the IDE Run console; no permanent configuration is needed for each exercise.
+4. Use the collapsed optional project controls for saved configurations, arguments, multi-file projects or remote interpreters.
 
 Controls include Run, change target, Test, Stop, Problems and Run console. Official ExecutionListener events report start/exit; zero means completion, nonzero failure, and common stop codes interruption. Requires PyCharm 2025.1+; local verification used CE 2025.1.3.1. Every IDE version and other Macs have not been tested.
 
-Installer versions are **VS Code 3.7.1 / PyCharm 3.7.0**. Older versions can report basic status but lack preview metadata, so execution controls are disabled. Atomic JSON mailboxes under the same user connect the IDEs and pet; there is no public network listener or IDE core modification.
+Installer versions are **VS Code 3.8.0 / PyCharm 3.8.0**. Older plugins can report basic status; new execution controls require the matching versions. Atomic JSON mailboxes under the same user connect the IDEs and pet; there is no public network listener or IDE core modification.
+
+## Paired updates and rollback
+
+The app and both plugins are **3.8.0**. Install the included VSIX and PyCharm ZIP, then reload VS Code and restart PyCharm.
+
+Settings → Version updates & rollback checks the GitHub manifest and imports, backs up or switches complete extracted local releases. SHA256 and app signatures are checked; active tasks block switching. Plugins are installed manually. The bundled `回退版本/v3.7.2` folder includes the previous app and matching plugins. This is not a background auto-updater or automatic crash rollback. Hashes and ad-hoc signatures establish integrity, not publisher identity or Apple notarization. See the [v3.8 supplement](v3.8使用补充.md) for steps (Chinese).
 
 ## Manuals and files
 
@@ -62,7 +67,7 @@ Installer versions are **VS Code 3.7.1 / PyCharm 3.7.0**. Older versions can rep
 - [Single-file workflow and verification scope](v3.7.1单文件运行修复说明.md), in Chinese.
 
 - [v3.7 usage supplement](v3.7使用补充.md), in Chinese: preview, quiet policies, history, timers, reminders, calendar and diagnostics.
-- [Word operation manual](手册/青春永驻桌宠操作手册.docx), in Chinese: keeps the **v3.6 baseline**. Use the **VS Code 3.7.1 / PyCharm 3.7.0** installers named here instead of its old installer names; new controls are covered by the supplement.
+- [Word operation manual](手册/青春永驻桌宠操作手册.docx), in Chinese: keeps the **v3.6 baseline**. Use the **VS Code 3.8.0 / PyCharm 3.8.0** installers named here instead of its old installer names; new controls are covered by the supplement.
 - [Voice provenance/trigger guide](语音来源与触发说明.md) and [credits](CREDITS.md).
 - `源码/`: Swift; `界面/`: local HTML/CSS/JavaScript; `联动插件/`: installers and source; `.app`: ready-to-run product.
 - `重新编译.command` uses existing Apple Command Line Tools, copies UI resources and ad-hoc signs. No third-party runtime dependency is required.
@@ -71,6 +76,16 @@ Installer versions are **VS Code 3.7.1 / PyCharm 3.7.0**. Older versions can rep
 Local state lives in `~/Library/Application Support/ForeverYoungPet/`; racing caches in `~/Library/Caches/org.foreveryoungpet.desktop/`. History and racing-cache clearing are independent and do not delete Codex tasks or IDE projects.
 
 ## Changelog
+
+**v3.8.0 (2026-10-10, since v3.7.2)**
+
+- Run the active PyCharm `.py` using its existing local interpreter and a temporary configuration, with interactive stdin and optional advanced controls.
+- Select the most recently focused IDE window or pin a project. Instance/file fingerprints reject stale previews.
+- Distinguish preparation, compilation, execution, completion, failure and interruption; prevent duplicate runs and stop pet-owned processes first.
+- Add bounded C/C++ compiler/Python traceback summaries and file/line navigation. Failed compilation never launches an old binary.
+- Add paired release manifests, integrity checking, local import/backup and manual rollback. Both plugins upgrade to 3.8.0.
+- Real isolated VS Code/PyCharm checks covered interactive input, failure navigation and Stop. Eight version-import, thirty UI and twenty-five integration checks passed; signatures and package integrity were verified. Not every IDE version or other Mac has been tested.
+
 
 **v3.7.2 (2026-10-07, since the repository’s v3.7)**
 

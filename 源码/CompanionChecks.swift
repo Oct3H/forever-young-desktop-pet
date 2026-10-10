@@ -56,7 +56,7 @@ extension InformationCard {
     func checkCompanionUI(defaults: UserDefaults,directory: URL) throws -> [String] {
         let tools=CompanionTools(defaults:defaults,root:directory.appendingPathComponent("ui-history"));tools.clearHistory()
         tools.add(ActivityRecord(id:"fixture",source:"vscode",instance:"fixture",threadID:"",state:"failed",title:"Literal <task>",project:"/tmp/fixture",date:Date(),duration:2))
-        var object=tools.object;object["diagnostics"]=["sources":[["source":"vscode","label":"VS Code","connected":true,"sentAt":Date().timeIntervalSince1970*1000,"metadata":["pluginVersion":"3.7.0","runTarget":"Main","runtime":"/usr/bin/python3","file":"/tmp/main.py","trusted":"true"]]]]
+        var object=tools.object;object["versions"]=["current":"3.8.0","status":"imported","versions":[["version":"3.7.2"],["version":"3.8.0"]]];object["diagnostics"]=["sources":[["source":"vscode","label":"VS Code","connected":true,"sentAt":Date().timeIntervalSince1970*1000,"metadata":["pluginVersion":"3.7.0","runTarget":"Main","runtime":"/usr/bin/python3","file":"/tmp/main.py","trusted":"true"]]]]
         renderCompanion(object);selectPage(.tools)
         var commands:[String]=[]
         onTools={ value in commands.append(value["command"] as? String ?? ""); if value["command"] as? String == "toolSetting",let key=value["key"] as? String,let setting=value["value"] {tools.set(key,value:setting);self.renderCompanion(tools.object)} }
@@ -72,6 +72,8 @@ extension InformationCard {
                 try clickForCheck("[data-open-settings]")
                 _ = try evaluateForCheck("[...document.querySelector('[data-ui-surface]:not([hidden]) [data-tool-settings]').querySelectorAll('details')].forEach(e=>e.open=true);true")
                 try require(try evaluateForCheck("document.documentElement.scrollWidth<=innerWidth && document.querySelector('[data-ui-surface]:not([hidden]) [data-tool-key=voiceVolume]')!==null") as? Bool == true,"new settings fit 320px for \(style)/\(language)")
+                try require(try evaluateForCheck("document.querySelectorAll('[data-ui-surface]:not([hidden]) [data-version-settings] .fy-version-row').length===2") as? Bool == true,"paired rollback versions shown")
+                try clickForCheck("[data-version-settings] [data-action=check]");try require(commands.last == "versionAction","version check reaches native dispatch")
                 try clickForCheck("[data-command=audition]");try require(commands.last == "audition","scene audition reaches native bridge")
                 try clickForCheck("[data-close-settings]")
             }
@@ -82,6 +84,6 @@ extension InformationCard {
         try capture(to:directory.appendingPathComponent("companion-settings-en-320.png"))
         try clickForCheck("[data-close-settings]");try setPreferenceForCheck("data-ui-language",value:"zh");panel.setContentSize(NSSize(width:590,height:760))
         try capture(to:directory.appendingPathComponent("companion-anime-history.png"))
-        return ["escaped history titles","native history jump","native timer dispatch","six 320px tool/settings layouts","five scene audition controls","native mode persistence"]
+        return ["escaped history titles","native history jump","native timer dispatch","six 320px tool/settings layouts","five scene audition controls","native mode persistence","version UI and native dispatch in six layouts"]
     }
 }
